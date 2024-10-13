@@ -9,10 +9,12 @@ object Main extends App {
   implicit val materializer: Materializer = Materializer(system)
 
   val endpoints = new Endpoints()
-  endpoints.startServer("localhost", 8080)
+  endpoints.startServer("localhost", 8081)
 
   println("Press ENTER to exit...")
   scala.io.StdIn.readLine()
 
-  system.terminate()
+  sys.addShutdownHook {
+    system.terminate()
+  }
 }

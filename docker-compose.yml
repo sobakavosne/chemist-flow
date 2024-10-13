@@ -1,0 +1,10 @@
+services:
+  chemist-flow:
+    container_name: chemist-flow
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8081"
+    stdin_open: true
+    tty: true
