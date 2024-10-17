@@ -8,6 +8,13 @@ ThisBuild / organizationName := "chemist.flow"
 Compile / mainClass   := Some("app.Main")
 Compile / scalaSource := baseDirectory.value / "src" / "main" / "scala"
 
+enablePlugins(DockerPlugin)
+enablePlugins(JavaAppPackaging)
+dockerExposedPorts ++= Seq(8081)
+Docker / packageName := "chemist-flow"
+// dockerEnvVars ++= Map(("CHEMIST_FLOW_HOST", "localhost"), ("CHEMIST_FLOW_PORT", "8081"))
+// dockerExposedVolumes := Seq("/opt/docker/.logs", "/opt/docker/.keys")
+
 Test / scalaSource := baseDirectory.value / "src" / "test" / "scala"
 
 lazy val root = (project in file("."))
@@ -15,11 +22,12 @@ lazy val root = (project in file("."))
     name := ".",
     libraryDependencies ++= Seq(
       scalaLogging,
+      akkaStream,
       scalaTest,
       akkaActor,
-      akkaStream,
       akkaHttp,
       akkaTest,
+      docker,
       spray
     )
   )

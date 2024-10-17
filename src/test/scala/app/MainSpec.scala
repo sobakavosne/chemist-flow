@@ -19,11 +19,11 @@ class MainSpec extends AnyWordSpec with Matchers with BeforeAndAfterAll {
     "start the ActorSystem and HTTP server" in {
       val endpoints = new Endpoints()
       val bindingFuture: Future[Http.ServerBinding] =
-        endpoints.startServer("localhost", 8080)
+        endpoints.startServer("0.0.0.0", 8081)
 
       val binding = Await.result(bindingFuture, 5.seconds)
 
-      binding.localAddress.getPort shouldEqual 8080
+      binding.localAddress.getPort shouldEqual 8081
 
       // More tests here to verify specific endpoint behavior
     }
