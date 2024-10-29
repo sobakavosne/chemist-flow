@@ -2,35 +2,35 @@ package app
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
-import akka.stream.Materializer
-import org.scalatest.BeforeAndAfterAll
-import scala.concurrent.duration.DurationInt
-import scala.concurrent.{Await, Future}
 import api.Endpoints
-import org.scalatest.wordspec.AnyWordSpec
+import cats.effect.{IO, Resource}
+import cats.effect.unsafe.implicits.global
+import org.scalatest.BeforeAndAfterAll
 import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AsyncWordSpec
 
-class MainSpec extends AnyWordSpec with Matchers with BeforeAndAfterAll {
+class MainSpec extends AsyncWordSpec with Matchers with BeforeAndAfterAll {
 
-  implicit val system: ActorSystem        = ActorSystem("TestActorSystem")
-  implicit val materializer: Materializer = Materializer(system)
+  implicit val system: ActorSystem = ActorSystem("TestActorSystem")
 
   "Main" should {
-    "start the ActorSystem and HTTP server" in {
-      val endpoints = new Endpoints()
-      val bindingFuture: Future[Http.ServerBinding] =
-        endpoints.startServer("0.0.0.0", 8081)
+    "start the ActorSystem and HTTP server as a Resource" in {
+      val endpoints: Endpoints                              = new Endpoints()
+      val bindingResource: Resource[IO, Http.ServerBinding] = endpoints.startServer("0.0.0.0", 8081)
 
-      val binding = Await.result(bindingFuture, 5.seconds)
+      bindingResource
+        .use { binding =>
+          IO {
+            binding.localAddress.getPort shouldEqual 8081
 
-      binding.localAddress.getPort shouldEqual 8081
-
-      // More tests here to verify specific endpoint behavior
+            // More tests here to verify specific endpoint behavior
+          }
+        }
+        .unsafeToFuture()
     }
   }
 
   override def afterAll(): Unit = {
     system.terminate()
-    Await.result(system.whenTerminated, 10.seconds)
   }
 }
