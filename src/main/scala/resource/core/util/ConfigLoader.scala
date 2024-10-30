@@ -34,9 +34,13 @@ case class AppConfig(
 
 object ConfigLoader {
 
-  private val refConf: Config = ConfigFactory.parseFile(new File("src/main/scala/resource/core/configs/reference.conf"))
-  private val appConf: Config = ConfigFactory.parseFile(new File("src/main/scala/resource/core/configs/application.conf"))
-  private val config: Config  = appConf.withFallback(refConf).resolve()
+  private val refConf: Config =
+    ConfigFactory.parseFile(new File("src/main/scala/resource/core/configs/reference.conf"))
+
+  private val appConf: Config =
+    ConfigFactory.parseFile(new File("src/main/scala/resource/core/configs/application.conf"))
+
+  private val config: Config = appConf.withFallback(refConf).resolve()
 
   val appConfig: AppConfig           = ConfigSource.fromConfig(config).loadOrThrow[AppConfig]
   val kafkaConfig: KafkaConfig       = appConfig.kafka

@@ -24,7 +24,9 @@ object Main extends IOApp {
             case Success(_)  => logger.info("Actor system terminated successfully")
             case Failure(ex) => logger.error(s"Actor system termination failed: ${ex.getMessage}")
           }
-      ).handleErrorWith(ex => IO(logger.error(s"Failed to terminate actor system: ${ex. getMessage}")))
+      ).handleErrorWith(ex =>
+        IO(logger.error(s"Failed to terminate actor system: ${ex.getMessage}"))
+      )
     )
 
   def endpointsResource: Resource[IO, Endpoints] =
