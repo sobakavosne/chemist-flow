@@ -22,11 +22,12 @@ lazy val root = (project in file("."))
     name := ".",
     libraryDependencies ++= Seq(
       scalaLogging,
-      catsEffect,
       circeGeneric,
       circeParser,
       circeCore,
+      catsEffect,
       akkaStream,
+      pureconfig,
       scalaTest,
       akkaActor,
       akkaHttp,
