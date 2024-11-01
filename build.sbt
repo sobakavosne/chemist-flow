@@ -27,6 +27,7 @@ lazy val root = (project in file("."))
       circeParser,
       // circeCore,
       catsEffect,
+      log4cats,
       http4sEmberClient,
       http4sEmberServer,
       http4sCirce,

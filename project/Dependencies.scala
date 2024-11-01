@@ -10,10 +10,12 @@ object Dependencies {
   lazy val circeVersion      = "0.14.5"
   lazy val pureconfigVersion = "0.17.1"
   lazy val http4sVersion     = "0.23.29"
+  lazy val log4catsVersion   = "2.7.0"
 
   lazy val akkaActor         = "com.typesafe.akka"     %% "akka-actor-typed"    % akkaVersion
   lazy val akkaStream        = "com.typesafe.akka"     %% "akka-stream"         % akkaVersion
   lazy val scalaLogging      = "ch.qos.logback"         % "logback-classic"     % scalaLogVersion
+  lazy val log4cats          = "org.typelevel"         %% "log4cats-core"       % log4catsVersion
   lazy val docker            = "com.spotify"            % "docker-client"       % dockerVersion
   lazy val catsEffect        = "org.typelevel"         %% "cats-effect"         % catsEffectVersion
   lazy val circeCore         = "io.circe"              %% "circe-core"          % circeVersion

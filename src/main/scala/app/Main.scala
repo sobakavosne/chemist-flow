@@ -5,36 +5,32 @@ import cats.effect.{ExitCode, IO, IOApp, Resource}
 import com.comcast.ip4s.{Host, Port}
 import resource.api.{Endpoints, ServerBuilder}
 import resource.core.util.ConfigLoader
-import org.slf4j.LoggerFactory
+import org.typelevel.log4cats.slf4j.Slf4jLogger
+import org.typelevel.log4cats.Logger
 import scala.concurrent.ExecutionContext
-import scala.util.{Failure, Success}
 
 object Main extends IOApp {
-  private val logger = LoggerFactory.getLogger(getClass)
-
   def actorSystemResource(
     implicit
     ec: ExecutionContext,
-    system: ActorSystem
+    system: ActorSystem,
+    logger: Logger[IO]
   ): Resource[IO, ActorSystem] =
-    Resource.make(IO(system))(system =>
-      IO(
-        system
-          .terminate()
-          .onComplete {
-            case Success(_)  => logger.info("Actor system terminated successfully")
-            case Failure(ex) => logger.error(s"Actor system termination failed: ${ex.getMessage}")
-          }
-      ).handleErrorWith(ex =>
-        IO(logger.error(s"Failed to terminate actor system: ${ex.getMessage}"))
-      )
-    )
+    Resource.make(IO(system)) { system =>
+      IO.fromFuture(IO(system.terminate())).attempt.flatMap {
+        case Right(_) => logger.info("Actor system terminated successfully")
+        case Left(ex) => logger.error(s"Actor system termination failed: ${ex.getMessage}")
+      }
+    }
 
   def serverBuilderResource(
-    implicit endpoints: Endpoints
+    implicit
+    endpoints: Endpoints,
+    serverBuilder: ServerBuilder,
+    logger: Logger[IO]
   ): Resource[IO, ServerBuilder] =
-    Resource.make(IO(new ServerBuilder))(endpoints =>
-      IO(logger.info("Shutting down ServerBuilder")).handleErrorWith(_ => IO.unit)
+    Resource.make(IO(serverBuilder))(endpoints =>
+      logger.info("Shutting down ServerBuilder").handleErrorWith(_ => IO.unit)
     )
 
   def runApp(
@@ -44,12 +40,14 @@ object Main extends IOApp {
     implicit
     ec: ExecutionContext,
     system: ActorSystem,
-    endpoints: Endpoints
+    endpoints: Endpoints,
+    serverBuilder: ServerBuilder,
+    logger: Logger[IO]
   ): Resource[IO, Unit] =
     for {
-      _             <- Resource.eval(IO(logger.info("Creating Actor system resource")))
+      _             <- Resource.eval(logger.info("Creating Actor system resource"))
       system        <- actorSystemResource
-      _             <- Resource.eval(IO(logger.info("Creating ServerBuilder resource")))
+      _             <- Resource.eval(logger.info("Creating ServerBuilder resource"))
       serverBuilder <- serverBuilderResource
       _             <- serverBuilder.startServer(host, port)
       _             <- Resource.eval(IO(scala.io.StdIn.readLine))
@@ -58,11 +56,13 @@ object Main extends IOApp {
   override def run(
     args: List[String]
   ): IO[ExitCode] = {
-    implicit val endpoints: Endpoints = new Endpoints
-    implicit val system: ActorSystem  = ActorSystem("ChemistFlowActorSystem")
-    implicit val ec: ExecutionContext = system.dispatcher
-
     val httpConfig = ConfigLoader.httpConfig
+
+    implicit val logger: Logger[IO]           = Slf4jLogger.getLogger[IO]
+    implicit val endpoints: Endpoints         = new Endpoints
+    implicit val serverBuilder: ServerBuilder = new ServerBuilder
+    implicit val system: ActorSystem          = ActorSystem("ChemistFlowActorSystem")
+    implicit val ec: ExecutionContext         = system.dispatcher
 
     runApp(httpConfig.host, httpConfig.port).use(_ => IO.unit).as(ExitCode.Success)
   }

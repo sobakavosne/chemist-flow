@@ -5,28 +5,23 @@ import com.comcast.ip4s.{Host, Port}
 import cats.syntax.flatMap.toFlatMapOps
 import org.http4s.server.Server
 import org.http4s.ember.server.EmberServerBuilder
-import org.slf4j.LoggerFactory
+import org.typelevel.log4cats.Logger
 
 class ServerBuilder(
-  implicit endpoints: Endpoints
+  implicit
+  endpoints: Endpoints,
+  logger: Logger[IO]
 ) {
-  private val logger = LoggerFactory.getLogger(getClass)
-
   def startServer(
-    interface: Host,
+    host: Host,
     port: Port
   ): Resource[IO, Server] = {
     EmberServerBuilder
       .default[IO]
-      .withHost(interface)
+      .withHost(host)
       .withPort(port)
       .withHttpApp(endpoints.routes.orNotFound)
       .build
-      .flatTap { server =>
-        Resource.eval(IO(logger.info(
-          s"Server online at http://${server.address.getHostName}:${server.address.getPort}/" +
-            s"\nPress ENTER to terminate..."
-        )))
-      }
+      .flatTap { server => Resource.eval(logger.info("Press ENTER to terminate...")) }
   }
 }

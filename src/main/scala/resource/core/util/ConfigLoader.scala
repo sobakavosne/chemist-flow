@@ -62,13 +62,16 @@ implicit val appConfigReader: ConfigReader[AppConfig] =
   ConfigReader.forProduct3("kafka", "http", "database")(AppConfig.apply)
 
 object ConfigLoader {
+  System.setProperty("logback.configurationFile", "src/main/scala/resource/core/configs/logback.xml")
+
   private val refConf: Config =
     ConfigFactory.parseFile(new File("src/main/scala/resource/core/configs/reference.conf"))
 
   private val appConf: Config =
     ConfigFactory.parseFile(new File("src/main/scala/resource/core/configs/application.conf"))
 
-  private val config: Config = appConf.withFallback(refConf).resolve()
+  private val config: Config =
+    appConf.withFallback(refConf).resolve()
 
   val appConfig: AppConfig           = ConfigSource.fromConfig(config).loadOrThrow[AppConfig]
   val kafkaConfig: KafkaConfig       = appConfig.kafka
