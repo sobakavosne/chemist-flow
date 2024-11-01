@@ -1,8 +1,9 @@
 package app
 
 import akka.actor.ActorSystem
-import api.Endpoints
 import cats.effect.{ExitCode, IO, IOApp, Resource}
+import com.comcast.ip4s.{Host, Port}
+import resource.api.{Endpoints, ServerBuilder}
 import resource.core.util.ConfigLoader
 import org.slf4j.LoggerFactory
 import scala.concurrent.ExecutionContext
@@ -29,31 +30,35 @@ object Main extends IOApp {
       )
     )
 
-  def endpointsResource: Resource[IO, Endpoints] =
-    Resource.make(IO(new Endpoints))(endpoints =>
-      IO(logger.info("Shutting down Endpoints")).handleErrorWith(_ => IO.unit)
+  def serverBuilderResource(
+    implicit endpoints: Endpoints
+  ): Resource[IO, ServerBuilder] =
+    Resource.make(IO(new ServerBuilder))(endpoints =>
+      IO(logger.info("Shutting down ServerBuilder")).handleErrorWith(_ => IO.unit)
     )
 
   def runApp(
-    host: String,
-    port: Int
+    host: Host,
+    port: Port
   )(
     implicit
     ec: ExecutionContext,
-    system: ActorSystem
+    system: ActorSystem,
+    endpoints: Endpoints
   ): Resource[IO, Unit] =
     for {
-      _         <- Resource.eval(IO(logger.info("Creating Actor system resource")))
-      system    <- actorSystemResource
-      _         <- Resource.eval(IO(logger.info("Creating Endpoints resource")))
-      endpoints <- endpointsResource
-      _         <- endpoints.startServer(host, port)(system)
-      _         <- Resource.eval(IO(scala.io.StdIn.readLine))
+      _             <- Resource.eval(IO(logger.info("Creating Actor system resource")))
+      system        <- actorSystemResource
+      _             <- Resource.eval(IO(logger.info("Creating ServerBuilder resource")))
+      serverBuilder <- serverBuilderResource
+      _             <- serverBuilder.startServer(host, port)
+      _             <- Resource.eval(IO(scala.io.StdIn.readLine))
     } yield ()
 
   override def run(
     args: List[String]
   ): IO[ExitCode] = {
+    implicit val endpoints: Endpoints = new Endpoints
     implicit val system: ActorSystem  = ActorSystem("ChemistFlowActorSystem")
     implicit val ec: ExecutionContext = system.dispatcher
 

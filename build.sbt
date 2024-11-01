@@ -1,6 +1,6 @@
 import Dependencies._
 
-ThisBuild / scalaVersion     := "2.12.19"
+ThisBuild / scalaVersion     := "3.3.3"
 ThisBuild / version          := "0.1.0-SNAPSHOT"
 ThisBuild / organization     := "com.chemist.flow"
 ThisBuild / organizationName := "chemist.flow"
@@ -22,24 +22,19 @@ lazy val root = (project in file("."))
     name := ".",
     libraryDependencies ++= Seq(
       scalaLogging,
+      scalaTest,
       circeGeneric,
       circeParser,
-      circeCore,
+      // circeCore,
       catsEffect,
-      akkaStream,
-      pureconfig,
-      scalaTest,
-      akkaActor,
-      akkaHttp,
-      akkaTest,
-      docker,
-      spray
+      http4sEmberClient,
+      http4sEmberServer,
+      http4sCirce,
+      http4sDSL,
+      pureconfig.cross(CrossVersion.for3Use2_13),
+      akkaStream.cross(CrossVersion.for3Use2_13),
+      // akkaActor.cross(CrossVersion.for3Use2_13),
+      // akkaTest.cross(CrossVersion.for3Use2_13),
+      // docker
     )
   )
-
-scalacOptions ++= Seq(
-  "-deprecation", // Warn about the usage of deprecated features
-  "-feature",     // Warn about features that should be enabled explicitly
-  "-unchecked", // Enable additional warnings where generated code depends on assumptions
-  "-Xlint:unused" // Enable warnings for unused imports
-)

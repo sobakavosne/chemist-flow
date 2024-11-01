@@ -1,36 +1,33 @@
 package app
 
-import akka.actor.ActorSystem
-import akka.http.scaladsl.Http
-import api.Endpoints
-import cats.effect.{IO, Resource}
+import cats.effect.IO
 import cats.effect.unsafe.implicits.global
+import com.comcast.ip4s.Host
+import com.comcast.ip4s.Port
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AsyncWordSpec
+import resource.api.Endpoints
+import resource.api.ServerBuilder
 
 class MainSpec extends AsyncWordSpec with Matchers with BeforeAndAfterAll {
 
-  implicit val system: ActorSystem = ActorSystem("TestActorSystem")
-
   "Main" should {
-    "start the ActorSystem and HTTP server as a Resource" in {
-      val endpoints: Endpoints                              = new Endpoints()
-      val bindingResource: Resource[IO, Http.ServerBinding] = endpoints.startServer("0.0.0.0", 8081)
+    "start the http4s server as a Resource" in {
+      implicit val endpoints = new Endpoints
+      val serverBuilder      = new ServerBuilder
+      val maybeHost          = Host.fromString("0.0.0.0")
+      val maybePort          = Port.fromInt(8081)
+      val bindingResource    = serverBuilder.startServer(maybeHost.get, maybePort.get)
 
       bindingResource
-        .use { binding =>
+        .use { server =>
           IO {
-            binding.localAddress.getPort shouldEqual 8081
-
-            // More tests here to verify specific endpoint behavior
+            server.address.getPort shouldEqual 8081
+            // More tests here to verify specific endpoint behaviour
           }
         }
         .unsafeToFuture()
     }
-  }
-
-  override def afterAll(): Unit = {
-    system.terminate()
   }
 }
