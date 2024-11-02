@@ -20,7 +20,7 @@ class ServerBuilder(
       .default[IO]
       .withHost(host)
       .withPort(port)
-      .withHttpApp(endpoints.routes.orNotFound)
+      .withHttpApp(ErrorHandler(endpoints.routes).orNotFound)
       .build
       .flatTap { server => Resource.eval(logger.info("Press ENTER to terminate...")) }
   }
