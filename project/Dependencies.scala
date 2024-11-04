@@ -14,6 +14,7 @@ object Dependencies {
 
   lazy val akkaActor         = "com.typesafe.akka"     %% "akka-actor-typed"    % akkaVersion
   lazy val akkaStream        = "com.typesafe.akka"     %% "akka-stream"         % akkaVersion
+  lazy val akkaCluster       = "com.typesafe.akka"     %% "akka-cluster"        % akkaVersion
   lazy val scalaLogging      = "ch.qos.logback"         % "logback-classic"     % scalaLogVersion
   lazy val log4cats          = "org.typelevel"         %% "log4cats-core"       % log4catsVersion
   lazy val docker            = "com.spotify"            % "docker-client"       % dockerVersion

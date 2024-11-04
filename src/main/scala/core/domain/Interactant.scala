@@ -1,4 +1,4 @@
-package resource.core.domain
+package core.domain
 
 import io.circe.{Decoder, Encoder}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}

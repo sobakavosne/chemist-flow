@@ -34,6 +34,7 @@ lazy val root = (project in file("."))
       http4sDSL,
       pureconfig.cross(CrossVersion.for3Use2_13),
       akkaStream.cross(CrossVersion.for3Use2_13),
+      // akkaCluster.cross(CrossVersion.for3Use2_13)
       // akkaActor.cross(CrossVersion.for3Use2_13),
       // akkaTest.cross(CrossVersion.for3Use2_13),
       // docker

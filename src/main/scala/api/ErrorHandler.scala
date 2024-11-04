@@ -1,4 +1,4 @@
-package resource.api
+package api
 
 import cats.effect.IO
 import org.http4s._
