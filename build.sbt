@@ -19,7 +19,7 @@ Test / scalaSource := baseDirectory.value / "src" / "test" / "scala"
 
 lazy val root = (project in file("."))
   .settings(
-    name := ".",
+    name := "chemist-flow",
     libraryDependencies ++= Seq(
       scalaLogging,
       scalaTest,

@@ -7,7 +7,7 @@ RUN \
   && rm -rf /var/lib/apt/lists/*
 
 RUN \
-  curl -Lo sbt.deb https://repo.scala-sbt.org/scalasbt/debian/sbt-1.9.1.deb \
+  curl -Lo sbt.deb https://repo.scala-sbt.org/scalasbt/debian/sbt-1.9.6.deb \
   && dpkg -i sbt.deb \
   && rm sbt.deb
 
