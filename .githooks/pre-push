@@ -16,7 +16,26 @@ fi
 
 echo ""
 echo "======================================"
-echo "Code format check passed. Proceeding with push."
+echo "Code format check passed. Running tests."
+echo "======================================"
+echo ""
+
+sbt test
+
+TEST_EXIT_CODE=$?
+
+if [ $TEST_EXIT_CODE -ne 0 ]; then
+  echo ""
+  echo "======================================"
+  echo "Tests failed. Please fix the issues before pushing."
+  echo "======================================"
+  echo ""
+  exit 1
+fi
+
+echo ""
+echo "======================================"
+echo "All tests passed. Proceeding with push."
 echo "======================================"
 echo ""
 exit 0
