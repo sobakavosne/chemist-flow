@@ -1,0 +1,40 @@
+# Ignore SBT and IDE-specific files
+.metals/
+.metals.sbt
+.bloop/
+.vscode/
+.idea/
+
+# Ignore OS-specific files
+.DS_Store
+Thumbs.db
+
+# Ignore build and target directories
+target/
+project/target/
+project/.bloop/
+project/.metals/
+project/**/target/
+
+# Ignore local caches
+.coursier/
+.ivy2/
+.sbt/
+
+# Ignore logs and temporary files
+logs/
+*.log
+tmp/
+task-temp-directory/
+
+# Ignore example files and test results
+examples/
+test-reports/
+
+# Ignore git and version control files
+.git/
+.gitignore
+
+# Ignore any sensitive files (if applicable)
+.env
+secrets/
