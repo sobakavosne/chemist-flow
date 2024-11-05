@@ -3,8 +3,8 @@ package app
 import akka.actor.ActorSystem
 import cats.effect.{ExitCode, IO, IOApp, Resource}
 import com.comcast.ip4s.{Host, Port}
-import resource.api.{Endpoints, ServerBuilder}
-import resource.core.util.ConfigLoader
+import api.{Endpoints, ServerBuilder}
+import config.ConfigLoader
 import org.typelevel.log4cats.slf4j.Slf4jLogger
 import org.typelevel.log4cats.Logger
 import scala.concurrent.ExecutionContext

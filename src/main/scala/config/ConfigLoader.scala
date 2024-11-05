@@ -1,4 +1,4 @@
-package resource.core.util
+package config
 
 import com.comcast.ip4s.{Host, Port}
 import com.typesafe.config.{Config, ConfigFactory}
@@ -62,13 +62,13 @@ implicit val appConfigReader: ConfigReader[AppConfig] =
   ConfigReader.forProduct3("kafka", "http", "database")(AppConfig.apply)
 
 object ConfigLoader {
-  System.setProperty("logback.configurationFile", "src/main/scala/resource/core/configs/logback.xml")
+  System.setProperty("logback.configurationFile", "src/main/scala/resource/logback.xml")
 
   private val refConf: Config =
-    ConfigFactory.parseFile(new File("src/main/scala/resource/core/configs/reference.conf"))
+    ConfigFactory.parseFile(new File("src/main/scala/resource/reference.conf"))
 
   private val appConf: Config =
-    ConfigFactory.parseFile(new File("src/main/scala/resource/core/configs/application.conf"))
+    ConfigFactory.parseFile(new File("src/main/scala/resource/application.conf"))
 
   private val config: Config =
     appConf.withFallback(refConf).resolve()

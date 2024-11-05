@@ -1,5 +1,7 @@
 package app
 
+import api.Endpoints
+import api.ServerBuilder
 import cats.effect.IO
 import cats.effect.unsafe.implicits.global
 import com.comcast.ip4s.Host
@@ -9,8 +11,6 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AsyncWordSpec
 import org.typelevel.log4cats.Logger
 import org.typelevel.log4cats.slf4j.Slf4jLogger
-import resource.api.Endpoints
-import resource.api.ServerBuilder
 
 class MainSpec extends AsyncWordSpec with Matchers with BeforeAndAfterAll {
 

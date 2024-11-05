@@ -1,4 +1,4 @@
-package resource.api
+package api
 
 import cats.effect.{IO, Resource}
 import com.comcast.ip4s.{Host, Port}

@@ -1,4 +1,4 @@
-package resource.api
+package api
 
 import cats.effect.IO
 import cats.syntax.semigroupk.toSemigroupKOps
@@ -6,7 +6,7 @@ import org.http4s.HttpRoutes
 import org.http4s.dsl.io._
 import org.http4s.server.Router
 import org.http4s.server.middleware.Logger
-import org.http4s.circe.CirceEntityEncoder._
+import org.http4s.circe.CirceEntityEncoder.circeEntityEncoder
 import io.circe.syntax.EncoderOps
 import io.circe.generic.auto._
 
