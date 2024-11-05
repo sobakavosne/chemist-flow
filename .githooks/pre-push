@@ -1,6 +1,7 @@
 #!/bin/sh
 
 echo "Running scalafmt check..."
+echo ""
 sbt scalafmtCheckAll
 
 EXIT_CODE=$?
