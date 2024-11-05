@@ -12,9 +12,9 @@ RUN echo '#!/bin/sh\nexec java -jar /usr/local/bin/sbt-launch.jar "$@"' > /usr/l
 
 COPY project/build.properties project/build.properties
 
-COPY build.sbt .
-
 COPY project/ project/
+
+COPY build.sbt .
 
 RUN sbt update
 

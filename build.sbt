@@ -8,12 +8,10 @@ ThisBuild / organizationName := "chemist.flow"
 Compile / mainClass   := Some("app.Main")
 Compile / scalaSource := baseDirectory.value / "src" / "main" / "scala"
 
-enablePlugins(DockerPlugin)
-enablePlugins(JavaAppPackaging)
-dockerExposedPorts ++= Seq(8081)
-Docker / packageName := "chemist-flow"
-// dockerEnvVars ++= Map(("CHEMIST_FLOW_HOST", "localhost"), ("CHEMIST_FLOW_PORT", "8081"))
-// dockerExposedVolumes := Seq("/opt/docker/.logs", "/opt/docker/.keys")
+enablePlugins(DockerPlugin, JavaAppPackaging)
+
+Docker / packageName        := "chemist-flow"
+Docker / dockerExposedPorts := Seq(8081)
 
 Test / scalaSource := baseDirectory.value / "src" / "test" / "scala"
 
