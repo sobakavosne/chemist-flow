@@ -2,13 +2,13 @@ package resource.models
 
 import io.circe.{Decoder, Encoder}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
-import chemical.{Accelerate, Catalyst, Molecule, ProductFrom, Reaction, ReagentIn}
+import chemical.{ACCELERATE, Catalyst, Molecule, PRODUCT_FROM, REAGENT_IN, Reaction}
 
 case class ReactionDetails(
   reaction: Reaction,
-  inboundReagents: List[(ReagentIn, Molecule)],
-  outboundProducts: List[(ProductFrom, Molecule)],
-  conditions: List[(Accelerate, Catalyst)]
+  inboundReagents: List[(REAGENT_IN, Molecule)],
+  outboundProducts: List[(PRODUCT_FROM, Molecule)],
+  conditions: List[(ACCELERATE, Catalyst)]
 )
 
 object ReactionDetails {
