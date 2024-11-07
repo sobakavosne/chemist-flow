@@ -2,9 +2,9 @@ package core.repositories
 
 import cats.effect.{Ref, Sync}
 import core.domain.{Mechanism, MechanismId}
-import core.errors.MechanismError
+import core.errors.http.MechanismError
+import core.errors.http.MechanismError.CreationError
 import cats.implicits.toFunctorOps
-import core.errors.MechanismError.CreationError
 import types.MechanismRepository
 
 /**
@@ -98,4 +98,5 @@ class InMemoryMechanismRepository[F[_]: Sync](state: Ref[F, Map[MechanismId, Mec
       if (mechanisms.contains(id)) (mechanisms - id, true)
       else (mechanisms, false)
     }
+
 }

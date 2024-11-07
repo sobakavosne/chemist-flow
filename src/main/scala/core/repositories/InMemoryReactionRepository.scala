@@ -4,10 +4,11 @@ import cats.effect.{Ref, Sync}
 import cats.implicits.toFunctorOps
 import core.domain.{Reaction, ReactionId}
 import types.ReactionRepository
-import core.errors.ReactionError
-import core.errors.ReactionError.CreationError
+import core.errors.http.ReactionError
+import core.errors.http.ReactionError.CreationError
 
 class InMemoryReactionRepository[F[_]: Sync](state: Ref[F, Map[ReactionId, Reaction]]) extends ReactionRepository[F] {
+
   private def generateId(currentState: Map[ReactionId, Reaction]): Int =
     currentState.keys.maxOption.getOrElse(0) + 1
 
@@ -31,4 +32,5 @@ class InMemoryReactionRepository[F[_]: Sync](state: Ref[F, Map[ReactionId, React
       if (reactions.contains(id)) (reactions - id, true)
       else (reactions, false)
     }
+
 }

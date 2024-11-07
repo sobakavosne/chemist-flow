@@ -1,7 +1,7 @@
 package core.repositories.types
 
 import core.domain.{Mechanism, MechanismId}
-import core.errors.MechanismError
+import core.errors.http.MechanismError
 
 trait MechanismRepository[F[_]] {
   def get(id: MechanismId):         F[Option[Mechanism]]

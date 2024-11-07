@@ -1,15 +1,15 @@
 package core.repositories
 
 import cats.effect.Sync
-import infrastructure.http.HttpClient
-import io.circe.parser.decode
 import cats.implicits.{toFlatMapOps, toFunctorOps}
-import org.http4s.Uri
 import core.domain.{Reaction, ReactionId}
-import types.ReactionRepository
-import core.errors.ReactionError
+import core.errors.http.ReactionError
+import core.errors.http.ReactionError.CreationError
+import io.circe.parser.decode
 import io.circe.syntax.EncoderOps
-import core.errors.ReactionError.CreationError
+import infrastructure.http.HttpClient
+import org.http4s.Uri
+import types.ReactionRepository
 
 class Neo4jReactionRepository[F[_]: Sync](client: HttpClient[F]) extends ReactionRepository[F] {
 
