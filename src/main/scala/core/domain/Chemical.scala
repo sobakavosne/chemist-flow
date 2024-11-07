@@ -1,23 +1,29 @@
-package chemical
+package core.domain
 
 import io.circe.{Decoder, Encoder}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 
+type MoleculeId = Int
+
+type ReactionId = Int
+
+type CatalystId = Int
+
 case class Molecule(
-  moleculeId: Int,
-  moleculeSmiles: String,
-  moleculeIupacName: String
+  id:        MoleculeId,
+  smiles:    String,
+  iupacName: String
 )
 
 case class Reaction(
-  reactionId: Int,
-  reactionName: String
+  id:   ReactionId,
+  name: String
 )
 
 case class Catalyst(
-  catalystId: Int,
-  catalystSmiles: String,
-  catalystName: Option[String]
+  id:     CatalystId,
+  smiles: String,
+  name:   Option[String]
 )
 
 case class PRODUCT_FROM(productAmount: Float)
@@ -26,7 +32,7 @@ case class REAGENT_IN(reagentAmount: Float)
 
 case class ACCELERATE(
   temperature: List[Float],
-  pressure: List[Float]
+  pressure:    List[Float]
 )
 
 object Molecule {

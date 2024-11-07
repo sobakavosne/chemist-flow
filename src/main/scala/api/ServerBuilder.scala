@@ -10,7 +10,7 @@ import org.typelevel.log4cats.Logger
 class ServerBuilder(
   implicit
   endpoints: Endpoints,
-  logger: Logger[IO]
+  logger:    Logger[IO]
 ) {
   def startServer(
     host: Host,

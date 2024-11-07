@@ -3,14 +3,14 @@ package core.domain
 import io.circe.{Decoder, Encoder}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 
-type MechanismID = Int
+type MechanismId = Int
 type StageID     = Int
 
 case class Mechanism(
-  mechanismId: MechanismID,
-  mechanismName: String,
-  mechanismType: String,
-  mechanismActivationEnergy: Float
+  id:               MechanismId,
+  name:             String,
+  family:           String,
+  activationEnergy: Float
 )
 
 object Mechanism {
@@ -28,10 +28,10 @@ object FOLLOW {
 }
 
 case class Stage(
-  stageOrder: StageID,
-  stageName: String,
-  stageDescription: String,
-  stageProducts: List[String]
+  order:       StageID,
+  name:        String,
+  description: String,
+  products:    List[String]
 )
 
 object Stage {
