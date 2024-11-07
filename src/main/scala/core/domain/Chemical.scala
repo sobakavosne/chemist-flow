@@ -1,32 +1,38 @@
-package chemical
+package core.domain
 
 import io.circe.{Decoder, Encoder}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 
+type MoleculeId = Int
+
+type ReactionId = Int
+
+type CatalystId = Int
+
 case class Molecule(
-  moleculeId: Int,
-  moleculeSmiles: String,
-  moleculeIupacName: String
+  id:        MoleculeId,
+  smiles:    String,
+  iupacName: String
 )
 
 case class Reaction(
-  reactionId: Int,
-  reactionName: String
+  id:   ReactionId,
+  name: String
 )
 
 case class Catalyst(
-  catalystId: Int,
-  catalystSmiles: String,
-  catalystName: Option[String]
+  id:     CatalystId,
+  smiles: String,
+  name:   Option[String]
 )
 
-case class ProductFrom(productAmount: Float)
+case class PRODUCT_FROM(productAmount: Float)
 
-case class ReagentIn(reagentAmount: Float)
+case class REAGENT_IN(reagentAmount: Float)
 
-case class Accelerate(
+case class ACCELERATE(
   temperature: List[Float],
-  pressure: List[Float]
+  pressure:    List[Float]
 )
 
 object Molecule {
@@ -44,17 +50,17 @@ object Catalyst {
   implicit val catalystDecoder: Decoder[Catalyst] = deriveDecoder[Catalyst]
 }
 
-object ProductFrom {
-  implicit val productFromEncoder: Encoder[ProductFrom] = deriveEncoder[ProductFrom]
-  implicit val productFromDecoder: Decoder[ProductFrom] = deriveDecoder[ProductFrom]
+object PRODUCT_FROM {
+  implicit val productFromEncoder: Encoder[PRODUCT_FROM] = deriveEncoder[PRODUCT_FROM]
+  implicit val productFromDecoder: Decoder[PRODUCT_FROM] = deriveDecoder[PRODUCT_FROM]
 }
 
-object ReagentIn {
-  implicit val reagentInEncoder: Encoder[ReagentIn] = deriveEncoder[ReagentIn]
-  implicit val reagentInDecoder: Decoder[ReagentIn] = deriveDecoder[ReagentIn]
+object REAGENT_IN {
+  implicit val reagentInEncoder: Encoder[REAGENT_IN] = deriveEncoder[REAGENT_IN]
+  implicit val reagentInDecoder: Decoder[REAGENT_IN] = deriveDecoder[REAGENT_IN]
 }
 
-object Accelerate {
-  implicit val accelerateEncoder: Encoder[Accelerate] = deriveEncoder[Accelerate]
-  implicit val accelerateDecoder: Decoder[Accelerate] = deriveDecoder[Accelerate]
+object ACCELERATE {
+  implicit val accelerateEncoder: Encoder[ACCELERATE] = deriveEncoder[ACCELERATE]
+  implicit val accelerateDecoder: Decoder[ACCELERATE] = deriveDecoder[ACCELERATE]
 }
