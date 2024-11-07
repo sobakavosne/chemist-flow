@@ -50,6 +50,7 @@ object Main extends IOApp {
       _             <- Resource.eval(logger.info("Creating ServerBuilder resource"))
       serverBuilder <- serverBuilderResource
       _             <- serverBuilder.startServer(host, port)
+      _             <- Resource.eval(logger.info("Press ENTER to terminate..."))
       _             <- Resource.eval(IO(scala.io.StdIn.readLine))
     } yield ()
 
