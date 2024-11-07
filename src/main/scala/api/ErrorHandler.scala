@@ -9,6 +9,7 @@ import org.http4s.circe.CirceEntityEncoder._
 final case class ErrorResponse(error: String, message: String)
 
 object ErrorHandler {
+
   def apply(routes: HttpRoutes[IO]): HttpRoutes[IO] = HttpRoutes.of[IO] { request =>
     routes(request).getOrElseF(
       IO(Response(Status.NotFound).withEntity(ErrorResponse(
@@ -35,4 +36,5 @@ object ErrorHandler {
         ).asJson))
     }
   }
+
 }

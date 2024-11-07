@@ -12,18 +12,24 @@ case class KafkaTopics(
   mechanisms: String
 )
 
-object KafkaTopics
-implicit val kafkaTopicsReader: ConfigReader[KafkaTopics] =
-  ConfigReader.forProduct2("reactions", "mechanisms")(KafkaTopics.apply)
+object KafkaTopics {
+
+  implicit val kafkaTopicsReader: ConfigReader[KafkaTopics] =
+    ConfigReader.forProduct2("reactions", "mechanisms")(KafkaTopics.apply)
+
+}
 
 case class KafkaConfig(
   bootstrapServers: String,
   topic:            KafkaTopics
 )
 
-object KafkaConfig
-implicit val kafkaConfigReader: ConfigReader[KafkaConfig] =
-  ConfigReader.forProduct2("bootstrapServers", "topic")(KafkaConfig.apply)
+object KafkaConfig {
+
+  implicit val kafkaConfigReader: ConfigReader[KafkaConfig] =
+    ConfigReader.forProduct2("bootstrapServers", "topic")(KafkaConfig.apply)
+
+}
 
 case class HttpConfig(
   host: Host,
@@ -31,6 +37,7 @@ case class HttpConfig(
 )
 
 object HttpConfig {
+
   implicit val hostReader: ConfigReader[Host] = ConfigReader.fromString { str =>
     Host.fromString(str).toRight(CannotConvert(str, "Host", "Invalid host format"))
   }
@@ -41,6 +48,7 @@ object HttpConfig {
 
   implicit val httpConfigReader: ConfigReader[HttpConfig] =
     ConfigReader.forProduct2("host", "port")(HttpConfig.apply)
+
 }
 
 case class DatabaseConfig(
@@ -49,9 +57,12 @@ case class DatabaseConfig(
   password: String
 )
 
-object DatabaseConfig
-implicit val databaseConfigReader: ConfigReader[DatabaseConfig] =
-  ConfigReader.forProduct3("url", "user", "password")(DatabaseConfig.apply)
+object DatabaseConfig {
+
+  implicit val databaseConfigReader: ConfigReader[DatabaseConfig] =
+    ConfigReader.forProduct3("url", "user", "password")(DatabaseConfig.apply)
+
+}
 
 case class HttpClientConfig(
   baseUri: String,
@@ -71,6 +82,7 @@ case class HttpClientPool(
 )
 
 object HttpClientConfig {
+
   implicit val httpClientTimeoutReader: ConfigReader[HttpClientTimeout] =
     ConfigReader.forProduct2("connect", "request")(HttpClientTimeout.apply)
 
@@ -79,6 +91,7 @@ object HttpClientConfig {
 
   implicit val httpClientConfigReader: ConfigReader[HttpClientConfig] =
     ConfigReader.forProduct4("baseUri", "timeout", "retries", "pool")(HttpClientConfig.apply)
+
 }
 
 case class AppConfig(
@@ -88,9 +101,12 @@ case class AppConfig(
   httpClient: HttpClientConfig
 )
 
-object AppConfig
-implicit val appConfigReader: ConfigReader[AppConfig] =
-  ConfigReader.forProduct4("kafka", "http", "database", "httpClient")(AppConfig.apply)
+object AppConfig {
+
+  implicit val appConfigReader: ConfigReader[AppConfig] =
+    ConfigReader.forProduct4("kafka", "http", "database", "httpClient")(AppConfig.apply)
+
+}
 
 object ConfigLoader {
   System.setProperty("logback.configurationFile", "src/main/scala/resource/logback.xml")

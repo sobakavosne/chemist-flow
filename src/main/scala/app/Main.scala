@@ -10,6 +10,7 @@ import org.typelevel.log4cats.Logger
 import scala.concurrent.ExecutionContext
 
 object Main extends IOApp {
+
   def actorSystemResource(
     implicit
     ec: ExecutionContext,
@@ -67,4 +68,5 @@ object Main extends IOApp {
 
     runApp(httpConfig.host, httpConfig.port).use(_ => IO.unit).as(ExitCode.Success)
   }
+
 }

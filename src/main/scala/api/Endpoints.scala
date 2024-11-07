@@ -11,6 +11,7 @@ import io.circe.syntax.EncoderOps
 import io.circe.generic.auto._
 
 class Endpoints {
+
   private val healthRoute: HttpRoutes[IO] = HttpRoutes.of[IO] {
     case GET -> Root / "health" =>
       Ok("Health check response")
@@ -44,4 +45,5 @@ class Endpoints {
       "/api" -> (healthRoute <+> getReactionRoute <+> postReactionRoute <+> deleteReactionRoute)
     )
   )
+
 }

@@ -12,6 +12,7 @@ import io.circe.syntax.EncoderOps
 import io.circe.parser.decode
 
 class HttpClient[F[_]: Async](client: Client[F], baseUri: Uri) extends Http4sClientDsl[F] {
+
   private def sendRequest(request: Request[F]): F[String] =
     client.run(request).use { response =>
       response.as[String].flatMap { body =>
@@ -44,10 +45,13 @@ class HttpClient[F[_]: Async](client: Client[F], baseUri: Uri) extends Http4sCli
 
   def decodeResponse[T: Decoder](response: String): F[T] =
     Async[F].fromEither(decode[T](response).left.map(err => new Exception(s"Decoding failed: $err")))
+
 }
 
 object HttpClient {
+
   def resource[F[_]: Async](client: Client[F], baseUri: Uri): HttpClient[F] = {
     new HttpClient[F](client, baseUri)
   }
+
 }
