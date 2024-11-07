@@ -1,37 +1,34 @@
-// package core.repositories
+package core.repositories
 
-// import cats.effect.{Ref, Sync}
-// import cats.implicits._
-// import core.domain.Reaction
+import cats.effect.{Ref, Sync}
+import cats.implicits.toFunctorOps
+import core.domain.{Reaction, ReactionId}
+import types.ReactionRepository
+import core.errors.ReactionError
+import core.errors.ReactionError.CreationError
 
-// class InMemoryReactionRepository[F[_]: Sync](state: Ref[F, Map[Int, Reaction]]) extends ReactionRepository[F] {
+class InMemoryReactionRepository[F[_]: Sync](state: Ref[F, Map[ReactionId, Reaction]]) extends ReactionRepository[F] {
+  private def generateId(currentState: Map[ReactionId, Reaction]): Int =
+    currentState.keys.maxOption.getOrElse(0) + 1
 
-//   private def generateId(currentState: Map[Int, Reaction]): Int =
-//     if (currentState.isEmpty) 1 else currentState.keys.max + 1
+  def get(id: ReactionId): F[Option[Reaction]] =
+    state.get.map(_.get(id))
 
-//   def get(id: Int): F[Option[Reaction]] =
-//     state.get.map(_.get(id))
+  def create(reaction: Reaction): F[Either[ReactionError, Reaction]] = {
+    state.modify { reactions =>
+      val id = generateId(reactions)
+      if (reactions.values.exists(_.name == reaction.name)) {
+        (reactions, Left(CreationError(s"Reaction with name '${reaction.name}' already exists")))
+      } else {
+        val newReaction = reaction.copy(id)
+        (reactions + (id -> newReaction), Right(newReaction))
+      }
+    }
+  }
 
-//   def create(reaction: Reaction): F[Reaction] =
-//     state.modify { reactions =>
-//       val id          = generateId(reactions)
-//       val newReaction = reaction.copy(reactionId = id)
-//       (reactions + (id -> newReaction), newReaction)
-//     }
-
-//   def update(id: Int, reaction: Reaction): F[Option[Reaction]] =
-//     state.modify { reactions =>
-//       reactions.get(id) match {
-//         case Some(_) =>
-//           val updatedReaction = reaction.copy(reactionId = id)
-//           (reactions + (id -> updatedReaction), Some(updatedReaction))
-//         case None => (reactions, None)
-//       }
-//     }
-
-//   def delete(id: Int): F[Boolean] =
-//     state.modify { reactions =>
-//       if (reactions.contains(id)) (reactions - id, true)
-//       else (reactions, false)
-//     }
-// }
+  def delete(id: ReactionId): F[Boolean] =
+    state.modify { reactions =>
+      if (reactions.contains(id)) (reactions - id, true)
+      else (reactions, false)
+    }
+}
