@@ -16,7 +16,7 @@ import core.errors.http.ReactionError
 class Endpoints(
   reactionService:  ReactionService[IO],
   mechanismService: MechanismService[IO]
-){
+) {
 
   private val getReactionRoute: HttpRoutes[IO] = HttpRoutes.of[IO] {
     case GET -> Root / "reaction" / id =>
