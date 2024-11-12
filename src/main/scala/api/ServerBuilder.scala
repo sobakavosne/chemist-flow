@@ -6,7 +6,7 @@ import org.http4s.server.Server
 import org.http4s.ember.server.EmberServerBuilder
 
 class ServerBuilder(
-  implicit endpoints: Endpoints
+  endpoints: Endpoints
 ) {
 
   def startServer(

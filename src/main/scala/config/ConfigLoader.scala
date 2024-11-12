@@ -6,6 +6,7 @@ import pureconfig.{ConfigReader, ConfigSource}
 import pureconfig.error.CannotConvert
 import java.io.File
 import scala.concurrent.duration.FiniteDuration
+import org.http4s.Uri
 
 case class KafkaTopics(
   reactions:  String,
@@ -65,7 +66,7 @@ object DatabaseConfig {
 }
 
 case class HttpClientConfig(
-  baseUri: String,
+  baseUri: Uri,
   timeout: HttpClientTimeout,
   retries: Int,
   pool:    HttpClientPool
@@ -88,6 +89,10 @@ object HttpClientConfig {
 
   implicit val httpClientPoolReader: ConfigReader[HttpClientPool] =
     ConfigReader.forProduct2("max-connections", "max-idle-time")(HttpClientPool.apply)
+
+  implicit val baseUriReader: ConfigReader[Uri] = ConfigReader.fromString { str =>
+    Uri.fromString(str).left.map(failure => CannotConvert(str, "Uri", failure.sanitized))
+  }
 
   implicit val httpClientConfigReader: ConfigReader[HttpClientConfig] =
     ConfigReader.forProduct4("baseUri", "timeout", "retries", "pool")(HttpClientConfig.apply)

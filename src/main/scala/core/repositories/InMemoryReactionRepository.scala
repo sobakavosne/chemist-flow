@@ -7,7 +7,8 @@ import types.ReactionRepository
 import core.errors.http.ReactionError
 import core.errors.http.ReactionError.CreationError
 
-class InMemoryReactionRepository[F[_]: Sync](state: Ref[F, Map[ReactionId, Reaction]]) extends ReactionRepository[F] {
+class InMemoryReactionRepository[F[_]: Sync](state: Ref[F, Map[ReactionId, Reaction]])
+    extends ReactionRepository[F] {
 
   private def generateId(currentState: Map[ReactionId, Reaction]): Int =
     currentState.keys.maxOption.getOrElse(0) + 1
@@ -18,8 +19,8 @@ class InMemoryReactionRepository[F[_]: Sync](state: Ref[F, Map[ReactionId, React
   def create(reaction: Reaction): F[Either[ReactionError, Reaction]] = {
     state.modify { reactions =>
       val id = generateId(reactions)
-      if (reactions.values.exists(_.name == reaction.name)) {
-        (reactions, Left(CreationError(s"Reaction with name '${reaction.name}' already exists")))
+      if (reactions.values.exists(_.reactionName == reaction.reactionName)) {
+        (reactions, Left(CreationError(s"Reaction with name '${reaction.reactionName}' already exists")))
       } else {
         val newReaction = reaction.copy(id)
         (reactions + (id -> newReaction), Right(newReaction))

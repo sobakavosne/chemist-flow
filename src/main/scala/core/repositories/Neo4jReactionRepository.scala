@@ -14,7 +14,7 @@ import types.ReactionRepository
 /**
  * ADDITIONAL MODULE
  *
- * Neo4jReactionRepository provides a direct interface to the Chemist service for managing reactions. This
+ * Neo4jReactionRepository provides a direct interface to the Chemist Pre-processor for managing reactions. This
  * implementation bypasses any caching or additional service logic, directly interacting with the Neo4j-backed Chemist
  * service through HTTP requests.
  *
@@ -24,7 +24,7 @@ import types.ReactionRepository
 class Neo4jReactionRepository[F[_]: Sync](client: HttpClient[F]) extends ReactionRepository[F] {
 
   /**
-   * Fetches a reaction by ID from the Chemist service.
+   * Fetches a reaction by ID from the Chemist Pre-processor.
    *
    * @param id
    *   The ReactionId of the reaction to fetch.
@@ -38,7 +38,7 @@ class Neo4jReactionRepository[F[_]: Sync](client: HttpClient[F]) extends Reactio
       .flatMap(Sync[F].fromEither)
 
   /**
-   * Creates a new reaction in the Chemist service.
+   * Creates a new reaction in the Chemist Pre-processor.
    *
    * @param reaction
    *   The Reaction object to be created.
@@ -52,12 +52,12 @@ class Neo4jReactionRepository[F[_]: Sync](client: HttpClient[F]) extends Reactio
       .flatMap { response =>
         io.circe.parser.decode[Reaction](response) match {
           case Right(createdReaction) => Sync[F].pure(Right(createdReaction))
-          case Left(_) => Sync[F].pure(Left(CreationError(s"Failed to create reaction: ${reaction.name}")))
+          case Left(_) => Sync[F].pure(Left(CreationError(s"Failed to create reaction: ${reaction.reactionName}")))
         }
       }
 
   /**
-   * Updates an existing reaction by ID in the Chemist service.
+   * Updates an existing reaction by ID in the Chemist Pre-processor.
    *
    * @param id
    *   The ID of the reaction to update.
@@ -74,7 +74,7 @@ class Neo4jReactionRepository[F[_]: Sync](client: HttpClient[F]) extends Reactio
       .flatMap(Sync[F].fromEither)
 
   /**
-   * Deletes a reaction by ID from the Chemist service.
+   * Deletes a reaction by ID from the Chemist Pre-processor.
    *
    * @param id
    *   The ID of the reaction to delete.

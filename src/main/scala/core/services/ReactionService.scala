@@ -10,15 +10,15 @@ import org.http4s.{Method, Request, Status, Uri}
 import io.circe.syntax.EncoderOps
 import org.http4s.circe.jsonEncoder
 import org.http4s.circe.toMessageSyntax
-import org.http4s.implicits.uri
+import core.domain.ReactionDetails
 
 class ReactionService[F[_]: Concurrent](
   client:       Client[F],
-  cacheService: CacheService[F]
+  cacheService: CacheService[F],
+  baseUri:      Uri
 ) {
-  private val baseUri = uri"http://localhost:8080/reaction"
 
-  def getReaction(id: ReactionId): F[Reaction] =
+  def getReaction(id: ReactionId): F[ReactionDetails] =
     cacheService
       .getReaction(id)
       .flatMap {
@@ -27,11 +27,11 @@ class ReactionService[F[_]: Concurrent](
         case None                 =>
           client.run(Request[F](Method.GET, baseUri / id.toString)).use { response =>
             response
-              .decodeJson[Reaction]
+              .decodeJson[ReactionDetails]
               .attempt
               .flatMap {
                 case Right(reaction) if response.status.isSuccess =>
-                  cacheService.putReaction(id, reaction) *> Concurrent[F].pure(reaction)
+                  cacheService.putReactionDetails(id, reaction) *> Concurrent[F].pure(reaction)
                 case _ if response.status == Status.NotFound      =>
                   Concurrent[F].raiseError(new NotFoundError(s"Reaction with ID $id not found"))
                 case _                                            =>
@@ -49,7 +49,7 @@ class ReactionService[F[_]: Concurrent](
           .attempt
           .flatMap {
             case Right(createdReaction) if response.status.isSuccess =>
-              cacheService.putReaction(createdReaction.id, createdReaction)
+              cacheService.putReaction(createdReaction.reactionId, createdReaction)
               *> Concurrent[F].pure(createdReaction)
             case Right(_)    => Concurrent[F].raiseError(CreationError("Reaction could not be created"))
             case Left(error) => Concurrent[F].raiseError(

@@ -4,26 +4,24 @@ import io.circe.{Decoder, Encoder}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 
 type MoleculeId = Int
-
 type ReactionId = Int
-
 type CatalystId = Int
 
 case class Molecule(
-  id:        MoleculeId,
-  smiles:    String,
-  iupacName: String
+  moleculeId:        MoleculeId,
+  moleculeSmiles:    String,
+  moleculeIupacName: String
 )
 
 case class Reaction(
-  id:   ReactionId,
-  name: String
+  reactionId:   ReactionId,
+  reactionName: String
 )
 
 case class Catalyst(
-  id:     CatalystId,
-  smiles: String,
-  name:   Option[String]
+  catalystId:     CatalystId,
+  catalystSmiles: String,
+  catalystName:   Option[String]
 )
 
 case class PRODUCT_FROM(productAmount: Float)
@@ -33,6 +31,21 @@ case class REAGENT_IN(reagentAmount: Float)
 case class ACCELERATE(
   temperature: List[Float],
   pressure:    List[Float]
+)
+
+case class InboundReagent(
+  reagentIn: REAGENT_IN,
+  molecule:  Molecule
+)
+
+case class OutboundProduct(
+  productFrom: PRODUCT_FROM,
+  molecule:    Molecule
+)
+
+case class Condition(
+  accelerate: ACCELERATE,
+  catalyst:   Catalyst
 )
 
 object Molecule {
@@ -63,4 +76,19 @@ object REAGENT_IN {
 object ACCELERATE {
   implicit val accelerateEncoder: Encoder[ACCELERATE] = deriveEncoder[ACCELERATE]
   implicit val accelerateDecoder: Decoder[ACCELERATE] = deriveDecoder[ACCELERATE]
+}
+
+object InboundReagent {
+  implicit val inboundReagentEncoder: Encoder[InboundReagent] = deriveEncoder[InboundReagent]
+  implicit val inboundReagentDecoder: Decoder[InboundReagent] = deriveDecoder[InboundReagent]
+}
+
+object OutboundProduct {
+  implicit val outboundProductEncoder: Encoder[OutboundProduct] = deriveEncoder[OutboundProduct]
+  implicit val outboundProductDecoder: Decoder[OutboundProduct] = deriveDecoder[OutboundProduct]
+}
+
+object Condition {
+  implicit val conditionEncoder: Encoder[Condition] = deriveEncoder[Condition]
+  implicit val conditionDecoder: Decoder[Condition] = deriveDecoder[Condition]
 }

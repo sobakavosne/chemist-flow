@@ -10,15 +10,17 @@ import org.http4s.{Method, Request, Status, Uri}
 import io.circe.syntax.EncoderOps
 import org.http4s.circe.jsonEncoder
 import org.http4s.circe.toMessageSyntax
-import org.http4s.implicits.uri
+import core.domain.MechanismDetails
 
 class MechanismService[F[_]: Concurrent](
   client:       Client[F],
-  cacheService: CacheService[F]
+  cacheService: CacheService[F],
+  baseUri:      Uri
+)(
+  // implicit logger:  org.typelevel.log4cats.Logger[cats.effect.IO]
 ) {
-  private val baseUri = uri"http://localhost:8080/mechanism"
 
-  def getMechanism(id: MechanismId): F[Mechanism] =
+  def getMechanism(id: MechanismId): F[MechanismDetails] =
     cacheService
       .getMechanism(id)
       .flatMap {
@@ -28,12 +30,13 @@ class MechanismService[F[_]: Concurrent](
           client
             .run(Request[F](Method.GET, baseUri / id.toString))
             .use { response =>
+              // logger.info(s"{response}")
               response
-                .decodeJson[Mechanism]
+                .decodeJson[MechanismDetails]
                 .attempt
                 .flatMap {
                   case Right(mechanism) if response.status.isSuccess =>
-                    cacheService.putMechanism(id, mechanism) *> Concurrent[F].pure(mechanism)
+                    cacheService.putMechanismDetails(id, mechanism) *> Concurrent[F].pure(mechanism)
                   case _ if response.status == Status.NotFound       =>
                     Concurrent[F].raiseError(new NotFoundError(s"Mechanism with ID $id not found"))
                   case _                                             =>
@@ -51,7 +54,7 @@ class MechanismService[F[_]: Concurrent](
           .attempt
           .flatMap {
             case Right(createdMechanism) if response.status.isSuccess =>
-              cacheService.putMechanism(createdMechanism.id, createdMechanism)
+              cacheService.putMechanism(createdMechanism.mechanismId, createdMechanism)
               *> Concurrent[F].pure(createdMechanism)
             case Right(_)    => Concurrent[F].raiseError(CreationError("Mechanism could not be created"))
             case Left(error) => Concurrent[F].raiseError(
