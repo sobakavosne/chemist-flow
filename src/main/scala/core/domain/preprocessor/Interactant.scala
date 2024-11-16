@@ -1,8 +1,7 @@
 package core.domain.preprocessor
 
-import io.circe.{Decoder, Encoder}
+import io.circe.{Decoder, DecodingFailure, Encoder, Json}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
-import cats.implicits.toFunctorOps
 import core.domain.preprocessor.Stage.stageDecoder
 
 sealed trait Interactant
@@ -25,22 +24,33 @@ object Interactant {
     case r: IReaction     => IReaction.iReactionEncoder(r)
   }
 
-  implicit val interactantDecoder: Decoder[Interactant] =
-    List[Decoder[Interactant]](
-      Decoder[IMolecule].widen,
-      Decoder[ICatalyst].widen,
-      Decoder[IAccelerate].widen,
-      Decoder[IProductFrom].widen,
-      Decoder[IReagentIn].widen,
-      Decoder[IReaction].widen
-    ).reduceLeft(_ or _)
+  implicit val interactantDecoder: Decoder[Interactant] = Decoder.instance { cursor =>
+    for {
+      tag         <- cursor.downField("tag").as[String]
+      contents    <- cursor.downField("contents").focus.map(_.as[Json]).getOrElse(Left(DecodingFailure(
+                       "Missing contents",
+                       cursor.history
+                     )))
+      interactant <- tag match {
+                       case "IMolecule"    => contents.as[Molecule].map(IMolecule.apply)
+                       case "ICatalyst"    => contents.as[Catalyst].map(ICatalyst.apply)
+                       case "IAccelerate"  => contents.as[ACCELERATE].map(IAccelerate.apply)
+                       case "IProductFrom" => contents.as[PRODUCT_FROM].map(IProductFrom.apply)
+                       case "IReagentIn"   => contents.as[REAGENT_IN].map(IReagentIn.apply)
+                       case "IReaction"    => contents.as[Reaction].map(IReaction.apply)
+                       case _              => Left(DecodingFailure(s"Unknown tag: $tag", cursor.history))
+                     }
+    } yield interactant
+  }
 
-  implicit val stageInteractantListDecoder: Decoder[List[(Stage, List[Interactant])]] =
+  implicit val stageInteractantDecoder: Decoder[List[(Stage, List[Interactant])]] =
     Decoder.decodeList(
-      Decoder[(Stage, List[Interactant])](for {
-        stage        <- stageDecoder
-        interactants <- Decoder.decodeList(interactantDecoder)
-      } yield (stage, interactants))
+      Decoder.instance { cursor =>
+        for {
+          stage        <- cursor.downArray.as[Stage]
+          interactants <- cursor.downArray.right.as[List[Interactant]]
+        } yield (stage, interactants)
+      }
     )
 
 }

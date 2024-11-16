@@ -1,15 +1,16 @@
 package core.services.preprocessor
 
 import cats.effect.Concurrent
-import cats.implicits.{catsSyntaxApplicativeError, catsSyntaxApplicativeId, catsSyntaxApplyOps, toFlatMapOps}
+import cats.implicits._
 import core.domain.preprocessor.{Reaction, ReactionDetails, ReactionId}
 import core.errors.http.preprocessor.ReactionError
-import core.errors.http.preprocessor.ReactionError.{CreationError, DeletionError, NotFoundError}
+import core.errors.http.preprocessor.ReactionError._
 import core.services.cache.CacheService
 import org.http4s.client.Client
 import org.http4s.{Method, Request, Status, Uri}
-import io.circe.syntax.EncoderOps
-import org.http4s.circe.{jsonEncoder, toMessageSyntax}
+import io.circe.syntax._
+import io.circe.parser.decode
+import org.http4s.circe._
 
 class ReactionService[F[_]: Concurrent](
   client:       Client[F],
@@ -18,52 +19,64 @@ class ReactionService[F[_]: Concurrent](
 ) {
 
   def getReaction(id: ReactionId): F[ReactionDetails] =
-    cacheService
-      .getReaction(id)
-      .flatMap {
-        case Some(cachedReaction) =>
-          Concurrent[F].pure(cachedReaction)
-        case None                 =>
-          client.run(Request[F](Method.GET, baseUri / id.toString)).use { response =>
-            response
-              .decodeJson[ReactionDetails]
-              .attempt
-              .flatMap {
-                case Right(reaction) if response.status.isSuccess =>
-                  cacheService.putReactionDetails(id, reaction) *> Concurrent[F].pure(reaction)
-                case _ if response.status == Status.NotFound      =>
-                  Concurrent[F].raiseError(new NotFoundError(s"Reaction with ID $id not found"))
-                case _                                            =>
-                  Concurrent[F].raiseError(new RuntimeException(s"Failed to fetch Reaction with ID $id"))
-              }
-          }
-      }
+    cacheService.getReaction(id).flatMap {
+      case Some(cachedReaction) => cachedReaction.pure[F]
+      case None                 => fetchReactionFromRemote(id)
+    }
 
-  def createReaction(Reaction: Reaction): F[Reaction] =
-    client
-      .run(Request[F](Method.POST, baseUri).withEntity(Reaction.asJson))
-      .use { response =>
-        response
-          .decodeJson[Reaction]
-          .attempt
-          .flatMap {
-            case Right(createdReaction) if response.status.isSuccess =>
-              cacheService.putReaction(createdReaction.reactionId, createdReaction)
-              *> Concurrent[F].pure(createdReaction)
-            case Right(_)    => Concurrent[F].raiseError(CreationError("Reaction could not be created"))
-            case Left(error) => Concurrent[F].raiseError(
-                CreationError(s"Failed to create Reaction: ${error.getMessage}")
-              )
-          }
-      }
+  def createReaction(reaction: Reaction): F[Reaction] =
+    makeRequest[Reaction](
+      Request[F](Method.POST, baseUri).withEntity(reaction.asJson),
+      responseBody =>
+        decode[Reaction](responseBody).leftMap { error =>
+          CreationError(s"Failed to create Reaction: ${error.getMessage}")
+        }
+    ).flatTap(createdReaction =>
+      cacheService.putReaction(createdReaction.reactionId, createdReaction)
+    )
 
   def deleteReaction(id: ReactionId): F[Either[ReactionError, Boolean]] =
-    client.run(Request[F](Method.DELETE, baseUri / id.toString)).use { response =>
-      if (response.status == Status.NoContent) {
-        cacheService.cleanExpiredEntries *> Right(true).pure[F]
-      } else {
-        Left(DeletionError(s"Failed to delete Reaction with ID: $id")).pure[F]
+    client
+      .run(Request[F](Method.DELETE, baseUri / id.toString))
+      .use { response =>
+        response.status match {
+          case Status.NoContent => cacheService.cleanExpiredEntries.as(Right(true))
+          case status           => Left(DeletionError(s"HTTP error ${status.code}: ${status.reason}")).pure[F]
+        }
       }
-    }
+      .recoverWith { case error =>
+        Left(NetworkError(s"Network error: ${error.getMessage}")).pure[F]
+      }
+
+  private def fetchReactionFromRemote(id: ReactionId): F[ReactionDetails] =
+    makeRequest[ReactionDetails](
+      Request[F](Method.GET, baseUri / id.toString),
+      responseBody =>
+        decode[ReactionDetails](responseBody).leftMap { error =>
+          DecodingError(s"Failed to parse ReactionDetails: ${error.getMessage}")
+        }
+    ).flatTap(reaction => cacheService.putReactionDetails(id, reaction))
+
+  private def makeRequest[A](
+    request: Request[F],
+    decodeFn: String => Either[ReactionError, A]
+  ): F[A] =
+    client
+      .run(request)
+      .use { response =>
+        response.as[String].flatMap { responseBody =>
+          response.status match {
+            case status if status.isSuccess =>
+              decodeFn(responseBody).fold(Concurrent[F].raiseError, Concurrent[F].pure)
+            case Status.NotFound            =>
+              Concurrent[F].raiseError(NotFoundError(s"Resource not found: ${request.uri}"))
+            case status                     =>
+              Concurrent[F].raiseError(HttpError(s"HTTP error ${status.code}: ${status.reason}"))
+          }
+        }
+      }
+      .recoverWith { case error =>
+        Concurrent[F].raiseError(NetworkError(s"Network error: ${error.getMessage}"))
+      }
 
 }
