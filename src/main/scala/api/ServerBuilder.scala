@@ -4,9 +4,10 @@ import cats.effect.{IO, Resource}
 import com.comcast.ip4s.{Host, Port}
 import org.http4s.server.Server
 import org.http4s.ember.server.EmberServerBuilder
+import endpoints.preprocessor.PreprocessorEndpoints
 
 class ServerBuilder(
-  endpoints: Endpoints
+  preprocessorEndpoints: PreprocessorEndpoints
 ) {
 
   def startServer(
@@ -17,7 +18,7 @@ class ServerBuilder(
       .default[IO]
       .withHost(host)
       .withPort(port)
-      .withHttpApp(ErrorHandler(endpoints.routes).orNotFound)
+      .withHttpApp(ErrorHandler(preprocessorEndpoints.routes).orNotFound)
       .build
   }
 

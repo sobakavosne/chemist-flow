@@ -1,10 +1,12 @@
 package app
 
-import api.{Endpoints, ServerBuilder}
+import api.endpoints.preprocessor.PreprocessorEndpoints
+import api.ServerBuilder
 import cats.effect.{IO, Resource}
 import cats.effect.unsafe.implicits.global
 import com.comcast.ip4s.{Host, Port}
-import core.services.{CacheService, MechanismService, ReactionService}
+import core.services.preprocessor.{MechanismService, ReactionService}
+import core.services.cache.CacheService
 import org.http4s.ember.client.EmberClientBuilder
 import org.http4s.Uri
 import org.scalatest.BeforeAndAfterAll
@@ -36,7 +38,7 @@ class MainSpec extends AsyncWordSpec with Matchers with BeforeAndAfterAll {
                               IO(new ReactionService[IO](client, cacheService, baseUri / "reaction"))
                             )(_ => IO.unit)
         endpoints        <- Resource.make(
-                              IO(new Endpoints(reactionService, mechanismService))
+                              IO(new PreprocessorEndpoints(reactionService, mechanismService))
                             )(_ => IO.unit)
         serverBuilder    <- Resource.make(
                               IO(new ServerBuilder(endpoints))

@@ -2,9 +2,9 @@ package core.repositories
 
 import cats.effect.Sync
 import cats.implicits.{toFlatMapOps, toFunctorOps}
-import core.domain.{Reaction, ReactionId}
-import core.errors.http.ReactionError
-import core.errors.http.ReactionError.CreationError
+import core.domain.preprocessor.{Reaction, ReactionId}
+import core.errors.http.preprocessor.ReactionError
+import core.errors.http.preprocessor.ReactionError.CreationError
 import io.circe.parser.decode
 import io.circe.syntax.EncoderOps
 import infrastructure.http.HttpClient

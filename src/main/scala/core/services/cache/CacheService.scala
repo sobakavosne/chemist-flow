@@ -1,12 +1,10 @@
-package core.services
+package core.services.cache
 
 import scala.concurrent.duration._
-import core.domain.{Mechanism, MechanismId, Reaction, ReactionId}
+import core.domain.preprocessor.{Mechanism, MechanismDetails, MechanismId, Reaction, ReactionDetails, ReactionId}
 import scala.collection.concurrent.TrieMap
 import scala.concurrent.duration.FiniteDuration
 import cats.effect.kernel.Sync
-import core.domain.ReactionDetails
-import core.domain.MechanismDetails
 
 class CacheService[F[_]: Sync] {
   private val mechanismCache: TrieMap[MechanismId, (Mechanism, Long)]               = TrieMap.empty

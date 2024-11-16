@@ -1,9 +1,9 @@
 package core.repositories
 
 import cats.effect.{Ref, Sync}
-import core.domain.{Mechanism, MechanismId}
-import core.errors.http.MechanismError
-import core.errors.http.MechanismError.CreationError
+import core.domain.preprocessor.{Mechanism, MechanismId}
+import core.errors.http.preprocessor.MechanismError
+import core.errors.http.preprocessor.MechanismError.CreationError
 import cats.implicits.toFunctorOps
 import types.MechanismRepository
 

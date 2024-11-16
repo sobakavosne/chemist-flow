@@ -1,10 +1,12 @@
 package app
 
-import api.{Endpoints, ServerBuilder}
+import api.ServerBuilder
+import api.endpoints.preprocessor.PreprocessorEndpoints
 import akka.actor.ActorSystem
 import cats.effect.{ExitCode, IO, IOApp, Resource}
 import com.comcast.ip4s.{Host, Port}
-import core.services.{CacheService, MechanismService, ReactionService}
+import core.services.preprocessor.{MechanismService, ReactionService}
+import core.services.cache.CacheService
 import config.ConfigLoader
 import org.typelevel.log4cats.slf4j.Slf4jLogger
 import org.typelevel.log4cats.Logger
@@ -32,12 +34,12 @@ object Main extends IOApp {
     )
 
   def serverBuilderResource(
-    endpoints: Endpoints
+    preprocessorEndpoints: PreprocessorEndpoints
   )(
     implicit logger: Logger[IO]
   ): Resource[IO, ServerBuilder] =
     Resource.make(
-      logger.info("Creating Server Builder") *> IO(new ServerBuilder(endpoints))
+      logger.info("Creating Server Builder") *> IO(new ServerBuilder(preprocessorEndpoints))
     )(endpoints =>
       logger.info("Shutting down ServerBuilder").handleErrorWith(_ => IO.unit)
     )
@@ -47,9 +49,9 @@ object Main extends IOApp {
     mechanismService: MechanismService[IO]
   )(
     implicit logger: Logger[IO]
-  ): Resource[IO, Endpoints] =
+  ): Resource[IO, PreprocessorEndpoints] =
     Resource.make(
-      logger.info("Creating Endpoints") *> IO(new Endpoints(reactionService, mechanismService))
+      logger.info("Creating Endpoints") *> IO(new PreprocessorEndpoints(reactionService, mechanismService))
     )(endpoints =>
       logger.info("Shutting down Endpoints").handleErrorWith(_ => IO.unit)
     )

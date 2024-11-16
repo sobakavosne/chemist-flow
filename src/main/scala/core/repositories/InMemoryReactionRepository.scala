@@ -2,10 +2,10 @@ package core.repositories
 
 import cats.effect.{Ref, Sync}
 import cats.implicits.toFunctorOps
-import core.domain.{Reaction, ReactionId}
+import core.domain.preprocessor.{Reaction, ReactionId}
 import types.ReactionRepository
-import core.errors.http.ReactionError
-import core.errors.http.ReactionError.CreationError
+import core.errors.http.preprocessor.ReactionError
+import core.errors.http.preprocessor.ReactionError.CreationError
 
 class InMemoryReactionRepository[F[_]: Sync](state: Ref[F, Map[ReactionId, Reaction]])
     extends ReactionRepository[F] {

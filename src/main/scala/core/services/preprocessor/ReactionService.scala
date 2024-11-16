@@ -1,16 +1,15 @@
-package core.services
+package core.services.preprocessor
 
 import cats.effect.Concurrent
 import cats.implicits.{catsSyntaxApplicativeError, catsSyntaxApplicativeId, catsSyntaxApplyOps, toFlatMapOps}
-import core.domain.{Reaction, ReactionId}
-import core.errors.http.ReactionError
-import core.errors.http.ReactionError.{CreationError, DeletionError, NotFoundError}
+import core.domain.preprocessor.{Reaction, ReactionDetails, ReactionId}
+import core.errors.http.preprocessor.ReactionError
+import core.errors.http.preprocessor.ReactionError.{CreationError, DeletionError, NotFoundError}
+import core.services.cache.CacheService
 import org.http4s.client.Client
 import org.http4s.{Method, Request, Status, Uri}
 import io.circe.syntax.EncoderOps
-import org.http4s.circe.jsonEncoder
-import org.http4s.circe.toMessageSyntax
-import core.domain.ReactionDetails
+import org.http4s.circe.{jsonEncoder, toMessageSyntax}
 
 class ReactionService[F[_]: Concurrent](
   client:       Client[F],

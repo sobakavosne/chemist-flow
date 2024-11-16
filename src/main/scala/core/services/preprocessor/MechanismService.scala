@@ -1,16 +1,16 @@
-package core.services
+package core.services.preprocessor
 
 import cats.effect.Concurrent
 import cats.implicits.{catsSyntaxApplicativeError, catsSyntaxApplicativeId, catsSyntaxApplyOps, toFlatMapOps}
-import core.domain.{Mechanism, MechanismId}
-import core.errors.http.MechanismError
-import core.errors.http.MechanismError.{CreationError, DeletionError, NotFoundError}
+import core.domain.preprocessor.{Mechanism, MechanismDetails, MechanismId}
+import core.errors.http.preprocessor.MechanismError
+import core.errors.http.preprocessor.MechanismError.{CreationError, DeletionError, NotFoundError}
+import core.services.cache.CacheService
 import org.http4s.client.Client
 import org.http4s.{Method, Request, Status, Uri}
 import io.circe.syntax.EncoderOps
 import org.http4s.circe.jsonEncoder
 import org.http4s.circe.toMessageSyntax
-import core.domain.MechanismDetails
 
 class MechanismService[F[_]: Concurrent](
   client:       Client[F],

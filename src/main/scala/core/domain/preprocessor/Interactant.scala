@@ -1,13 +1,18 @@
-package core.domain
+package core.domain.preprocessor
 
 import io.circe.{Decoder, Encoder}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import cats.implicits.toFunctorOps
+import core.domain.preprocessor.Stage.stageDecoder
 
 sealed trait Interactant
 
 case class IMolecule(molecule: Molecule) extends Interactant
 case class ICatalyst(catalyst: Catalyst) extends Interactant
+case class IAccelerate(accelerate: ACCELERATE) extends Interactant
+case class IProductFrom(productFrom: PRODUCT_FROM) extends Interactant
+case class IReagentIn(reagentIn: REAGENT_IN) extends Interactant
+case class IReaction(reaction: Reaction) extends Interactant
 
 object Interactant {
 
@@ -20,14 +25,23 @@ object Interactant {
     case r: IReaction     => IReaction.iReactionEncoder(r)
   }
 
-  implicit val interactantDecoder: Decoder[Interactant] = List[Decoder[Interactant]](
-    Decoder[IMolecule].widen,
-    Decoder[ICatalyst].widen,
-    Decoder[IAccelerate].widen,
-    Decoder[IProductFrom].widen,
-    Decoder[IReagentIn].widen,
-    Decoder[IReaction].widen
-  ).reduceLeft(_ or _)
+  implicit val interactantDecoder: Decoder[Interactant] =
+    List[Decoder[Interactant]](
+      Decoder[IMolecule].widen,
+      Decoder[ICatalyst].widen,
+      Decoder[IAccelerate].widen,
+      Decoder[IProductFrom].widen,
+      Decoder[IReagentIn].widen,
+      Decoder[IReaction].widen
+    ).reduceLeft(_ or _)
+
+  implicit val stageInteractantListDecoder: Decoder[List[(Stage, List[Interactant])]] =
+    Decoder.decodeList(
+      Decoder[(Stage, List[Interactant])](for {
+        stage        <- stageDecoder
+        interactants <- Decoder.decodeList(interactantDecoder)
+      } yield (stage, interactants))
+    )
 
 }
 
@@ -40,11 +54,6 @@ object ICatalyst {
   implicit val iCatalystEncoder: Encoder[ICatalyst] = deriveEncoder[ICatalyst]
   implicit val iCatalystDecoder: Decoder[ICatalyst] = deriveDecoder[ICatalyst]
 }
-
-case class IAccelerate(accelerate: ACCELERATE) extends Interactant
-case class IProductFrom(productFrom: PRODUCT_FROM) extends Interactant
-case class IReagentIn(reagentIn: REAGENT_IN) extends Interactant
-case class IReaction(reaction: Reaction) extends Interactant
 
 object IAccelerate {
   implicit val iAccelerateEncoder: Encoder[IAccelerate] = deriveEncoder

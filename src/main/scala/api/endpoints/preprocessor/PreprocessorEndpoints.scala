@@ -1,4 +1,4 @@
-package api
+package api.endpoints.preprocessor
 
 import cats.effect.IO
 import cats.syntax.semigroupk.toSemigroupKOps
@@ -9,11 +9,11 @@ import org.http4s.server.Router
 import org.http4s.server.middleware.Logger
 import org.http4s.circe.CirceEntityEncoder.circeEntityEncoder
 import org.http4s.circe.CirceSensitiveDataEntityDecoder.circeEntityDecoder
-import core.services.{MechanismService, ReactionService}
-import core.domain.{MechanismDetails, Reaction, ReactionDetails}
-import core.errors.http.ReactionError
+import core.services.preprocessor.{MechanismService, ReactionService}
+import core.domain.preprocessor.{MechanismDetails, Reaction, ReactionDetails}
+import core.errors.http.preprocessor.ReactionError
 
-class Endpoints(
+class PreprocessorEndpoints(
   reactionService:  ReactionService[IO],
   mechanismService: MechanismService[IO]
 ) {

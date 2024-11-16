@@ -1,4 +1,4 @@
-package core.errors.http
+package core.errors.http.preprocessor
 
 sealed trait MechanismError extends Throwable {
   def message: String
