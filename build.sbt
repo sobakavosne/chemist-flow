@@ -41,3 +41,7 @@ lazy val root = (project in file("."))
   )
 
 resolvers += "Akka library repository".at("https://repo.akka.io/maven")
+
+scalacOptions ++= Seq(
+  "-Xmax-inlines", "64"
+)

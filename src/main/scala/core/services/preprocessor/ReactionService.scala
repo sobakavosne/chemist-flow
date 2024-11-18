@@ -13,8 +13,8 @@ import io.circe.parser.decode
 import org.http4s.circe._
 
 class ReactionService[F[_]: Concurrent](
-  client:       Client[F],
   cacheService: CacheService[F],
+  client:       Client[F],
   baseUri:      Uri
 ) {
 

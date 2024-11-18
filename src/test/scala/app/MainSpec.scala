@@ -5,10 +5,11 @@ import api.ServerBuilder
 import cats.effect.{IO, Resource}
 import cats.effect.unsafe.implicits.global
 import com.comcast.ip4s.{Host, Port}
-import core.services.preprocessor.{MechanismService, ReactionService}
 import core.services.cache.CacheService
-import org.http4s.ember.client.EmberClientBuilder
+import core.services.flow.ReaktoroService
+import core.services.preprocessor.{MechanismService, ReactionService}
 import org.http4s.Uri
+import org.http4s.ember.client.EmberClientBuilder
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AsyncWordSpec
@@ -22,9 +23,10 @@ class MainSpec extends AsyncWordSpec with Matchers with BeforeAndAfterAll {
   "Main" should {
     "start the http4s server as a Resource" in {
 
-      val maybeHost = Host.fromString("0.0.0.0").get
-      val maybePort = Port.fromInt(8081).get
-      val baseUri   = Uri.unsafeFromString("http://localhost:8081")
+      val maybeHost       = Host.fromString("0.0.0.0").get
+      val maybePort       = Port.fromInt(8081).get
+      val preprocessorUri = Uri.unsafeFromString("http://localhost:8080")
+      val engineUri       = Uri.unsafeFromString("http://localhost:8082/api")
 
       val serverResource = for {
         client           <- EmberClientBuilder.default[IO].build
@@ -32,10 +34,13 @@ class MainSpec extends AsyncWordSpec with Matchers with BeforeAndAfterAll {
                               IO(new CacheService[IO])
                             )(_ => IO.unit)
         mechanismService <- Resource.make(
-                              IO(new MechanismService[IO](client, cacheService, baseUri / "mechanism"))
+                              IO(new MechanismService[IO](cacheService, client, preprocessorUri / "mechanism"))
                             )(_ => IO.unit)
         reactionService  <- Resource.make(
-                              IO(new ReactionService[IO](client, cacheService, baseUri / "reaction"))
+                              IO(new ReactionService[IO](cacheService, client, preprocessorUri / "reaction"))
+                            )(_ => IO.unit)
+        reaktoroService  <- Resource.make(
+                              IO(new ReaktoroService[IO](reactionService, client, engineUri / "reaction"))
                             )(_ => IO.unit)
         endpoints        <- Resource.make(
                               IO(new PreprocessorEndpoints(reactionService, mechanismService))
@@ -50,7 +55,7 @@ class MainSpec extends AsyncWordSpec with Matchers with BeforeAndAfterAll {
         .use { server =>
           IO {
             server.address.getPort shouldEqual 8081
-            // Additional tests can be added here to verify endpoint behaviour
+            // Additional tests can verify the availability and behaviour of endpoints.
           }
         }
         .unsafeToFuture()

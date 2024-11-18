@@ -8,9 +8,9 @@ import core.domain.preprocessor.Molecule._
 case class DataBase(name: String)
 
 object DataBase {
-  val ThermoFunDatabaseSlop    = DataBase("slop98")
-  val PhreeqcDatabase          = DataBase("phreeqc.dat")
-  val ThermoFunDatabaseCemdata = DataBase("cemdata18")
+  val thermoFunDatabaseSlop    = DataBase("slop98")
+  val phreeqcDatabase          = DataBase("phreeqc.dat")
+  val thermoFunDatabaseCemdata = DataBase("cemdata18")
 
   def custom(name: String): DataBase = DataBase(name)
 
@@ -28,4 +28,14 @@ case class SystemState(
 object SystemState {
   implicit val encoder: Encoder[SystemState] = deriveEncoder
   implicit val decoder: Decoder[SystemState] = deriveDecoder
+}
+
+case class MoleculeAmountList(
+  inboundReagentAmounts:  List[Double],
+  outboundProductAmounts: List[Double]
+)
+
+object MoleculeAmountList {
+  implicit val encoder: Encoder[MoleculeAmountList] = deriveEncoder
+  implicit val decoder: Decoder[MoleculeAmountList] = deriveDecoder
 }

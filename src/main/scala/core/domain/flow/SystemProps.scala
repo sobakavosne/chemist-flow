@@ -22,7 +22,7 @@ case class EnergyInfo(name: String, value: Double, unit: String)
 case class MoleFraction(name: String, value: Double, unit: String)
 case class HeatCapacity(name: String, value: Double, unit: String)
 
-case class ChemicalProps(
+case class SystemProps(
   generalProperties:         Map[String, Property],
   elementAmounts:            List[Amount],
   speciesAmounts:            List[Amount],
@@ -72,7 +72,7 @@ object HeatCapacity {
   implicit val decoder: Decoder[HeatCapacity] = deriveDecoder
 }
 
-object ThermodynamicData {
-  implicit val encoder: Encoder[ChemicalProps] = deriveEncoder
-  implicit val decoder: Decoder[ChemicalProps] = deriveDecoder
+object SystemProps {
+  implicit val encoder: Encoder[SystemProps] = deriveEncoder
+  implicit val decoder: Decoder[SystemProps] = deriveDecoder
 }

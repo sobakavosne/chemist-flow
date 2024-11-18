@@ -65,7 +65,7 @@ object DatabaseConfig {
 
 }
 
-case class HttpClientConfig(
+case class ChemistPreprocessorHttpClient(
   baseUri: Uri,
   timeout: HttpClientTimeout,
   retries: Int,
@@ -82,7 +82,7 @@ case class HttpClientPool(
   maxIdleTime:    FiniteDuration
 )
 
-object HttpClientConfig {
+object ChemistPreprocessorHttpClient {
 
   implicit val httpClientTimeoutReader: ConfigReader[HttpClientTimeout] =
     ConfigReader.forProduct2("connect", "request")(HttpClientTimeout.apply)
@@ -94,23 +94,65 @@ object HttpClientConfig {
     Uri.fromString(str).left.map(failure => CannotConvert(str, "Uri", failure.sanitized))
   }
 
-  implicit val httpClientConfigReader: ConfigReader[HttpClientConfig] =
-    ConfigReader.forProduct4("baseUri", "timeout", "retries", "pool")(HttpClientConfig.apply)
+  implicit val httpClientConfigReader: ConfigReader[ChemistPreprocessorHttpClient] =
+    ConfigReader.forProduct4("baseUri", "timeout", "retries", "pool")(ChemistPreprocessorHttpClient.apply)
+
+}
+
+case class ChemistEngineHttpClient(
+  baseUri: Uri,
+  timeout: HttpClientTimeout,
+  retries: Int,
+  pool:    HttpClientPool
+)
+
+object ChemistEngineHttpClient {
+
+  implicit val httpClientTimeoutReader: ConfigReader[HttpClientTimeout] =
+    ConfigReader.forProduct2("connect", "request")(HttpClientTimeout.apply)
+
+  implicit val httpClientPoolReader: ConfigReader[HttpClientPool] =
+    ConfigReader.forProduct2("max-connections", "max-idle-time")(HttpClientPool.apply)
+
+  implicit val baseUriReader: ConfigReader[Uri] = ConfigReader.fromString { str =>
+    Uri.fromString(str).left.map(failure => CannotConvert(str, "Uri", failure.sanitized))
+  }
+
+  implicit val httpClientConfigReader: ConfigReader[ChemistEngineHttpClient] =
+    ConfigReader.forProduct4("baseUri", "timeout", "retries", "pool")(ChemistEngineHttpClient.apply)
 
 }
 
 case class AppConfig(
-  kafka:      KafkaConfig,
-  http:       HttpConfig,
-  database:   DatabaseConfig,
-  httpClient: HttpClientConfig
+  kafka:                  KafkaConfig,
+  http:                   HttpConfig,
+  database:               DatabaseConfig,
+  preprocessorHttpClient: ChemistPreprocessorHttpClient,
+  engineHttpClient:       ChemistEngineHttpClient
 )
 
 object AppConfig {
 
   implicit val appConfigReader: ConfigReader[AppConfig] =
-    ConfigReader.forProduct4("kafka", "http", "database", "httpClient")(AppConfig.apply)
+    ConfigReader.forProduct5(
+      "kafka",
+      "http",
+      "database",
+      "chemistPreprocessorHttpClient",
+      "chemistEngineHttpClient"
+    )(
+      AppConfig.apply
+    )
 
+}
+
+sealed trait ConfigLoader {
+  def appConfig: AppConfig
+  def kafkaConfig: KafkaConfig
+  def httpConfig: HttpConfig
+  def databaseConfig: DatabaseConfig
+  def preprocessorHttpClientConfig: ChemistPreprocessorHttpClient
+  def engineHttpClientConfig: ChemistEngineHttpClient
 }
 
 object ConfigLoader {
@@ -125,9 +167,15 @@ object ConfigLoader {
   private val config: Config =
     appConf.withFallback(refConf).resolve()
 
-  val appConfig: AppConfig               = ConfigSource.fromConfig(config).loadOrThrow[AppConfig]
-  val kafkaConfig: KafkaConfig           = appConfig.kafka
-  val httpConfig: HttpConfig             = appConfig.http
-  val databaseConfig: DatabaseConfig     = appConfig.database
-  val httpClientConfig: HttpClientConfig = appConfig.httpClient
+  private lazy val loadedAppConfig: AppConfig = ConfigSource.fromConfig(config).loadOrThrow[AppConfig]
+
+  case object DefaultConfigLoader extends ConfigLoader {
+    override val appConfig: AppConfig                                        = loadedAppConfig
+    override val kafkaConfig: KafkaConfig                                    = appConfig.kafka
+    override val httpConfig: HttpConfig                                      = appConfig.http
+    override val databaseConfig: DatabaseConfig                              = appConfig.database
+    override val preprocessorHttpClientConfig: ChemistPreprocessorHttpClient = appConfig.preprocessorHttpClient
+    override val engineHttpClientConfig: ChemistEngineHttpClient             = appConfig.engineHttpClient
+  }
+
 }
