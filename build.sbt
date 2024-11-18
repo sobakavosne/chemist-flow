@@ -17,7 +17,7 @@ Test / scalaSource := baseDirectory.value / "src" / "test" / "scala"
 
 lazy val root = (project in file("."))
   .settings(
-    name := "chemist-flow",
+    name := ".",
     libraryDependencies ++= Seq(
       scalaLogging,
       scalaTest,
@@ -40,8 +40,13 @@ lazy val root = (project in file("."))
     )
   )
 
-resolvers += "Akka library repository".at("https://repo.akka.io/maven")
-
 scalacOptions ++= Seq(
   "-Xmax-inlines", "64"
+)
+
+resolvers ++= Seq(
+  "Akka library repository" at "https://repo.akka.io/maven",
+  "Sonatype OSS Releases" at "https://oss.sonatype.org/content/repositories/releases/",
+  "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/",
+  "Maven Central" at "https://repo1.maven.org/maven2/"
 )
