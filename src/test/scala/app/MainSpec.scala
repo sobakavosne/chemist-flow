@@ -2,12 +2,17 @@ package app
 
 import api.endpoints.preprocessor.PreprocessorEndpoints
 import api.ServerBuilder
+
 import cats.effect.{IO, Resource}
 import cats.effect.unsafe.implicits.global
+import cats.implicits.toSemigroupKOps
+
 import com.comcast.ip4s.{Host, Port}
+
 import core.services.cache.CacheService
 import core.services.flow.ReaktoroService
 import core.services.preprocessor.{MechanismService, ReactionService}
+
 import org.http4s.Uri
 import org.http4s.ember.client.EmberClientBuilder
 import org.scalatest.BeforeAndAfterAll
@@ -29,26 +34,29 @@ class MainSpec extends AsyncWordSpec with Matchers with BeforeAndAfterAll {
       val engineUri       = Uri.unsafeFromString("http://localhost:8082/api")
 
       val serverResource = for {
-        client           <- EmberClientBuilder.default[IO].build
-        cacheService     <- Resource.make(
-                              IO(new CacheService[IO])
-                            )(_ => IO.unit)
-        mechanismService <- Resource.make(
-                              IO(new MechanismService[IO](cacheService, client, preprocessorUri / "mechanism"))
-                            )(_ => IO.unit)
-        reactionService  <- Resource.make(
-                              IO(new ReactionService[IO](cacheService, client, preprocessorUri / "reaction"))
-                            )(_ => IO.unit)
-        reaktoroService  <- Resource.make(
-                              IO(new ReaktoroService[IO](reactionService, client, engineUri / "reaction"))
-                            )(_ => IO.unit)
-        endpoints        <- Resource.make(
-                              IO(new PreprocessorEndpoints(reactionService, mechanismService))
-                            )(_ => IO.unit)
-        serverBuilder    <- Resource.make(
-                              IO(new ServerBuilder(endpoints))
-                            )(_ => IO.unit)
-        server           <- serverBuilder.startServer(maybeHost, maybePort)
+        client                <- EmberClientBuilder.default[IO].build
+        cacheService          <- Resource.make(
+                                   IO(new CacheService[IO])
+                                 )(_ => IO.unit)
+        mechanismService      <- Resource.make(
+                                   IO(new MechanismService[IO](cacheService, client, preprocessorUri / "mechanism"))
+                                 )(_ => IO.unit)
+        reactionService       <- Resource.make(
+                                   IO(new ReactionService[IO](cacheService, client, preprocessorUri / "reaction"))
+                                 )(_ => IO.unit)
+        reaktoroService       <- Resource.make(
+                                   IO(new ReaktoroService[IO](reactionService, client, engineUri / "reaction"))
+                                 )(_ => IO.unit)
+        preprocessorEndpoints <- Resource.make(
+                                   IO(new PreprocessorEndpoints(reactionService, mechanismService))
+                                 )(_ => IO.unit)
+        reaktoroEndpoints     <- Resource.make(
+                                   IO(new PreprocessorEndpoints(reactionService, mechanismService))
+                                 )(_ => IO.unit)
+        serverBuilder         <- Resource.make(
+                                   IO(new ServerBuilder(preprocessorEndpoints.routes <+> reaktoroEndpoints.routes))
+                                 )(_ => IO.unit)
+        server                <- serverBuilder.startServer(maybeHost, maybePort)
       } yield server
 
       serverResource

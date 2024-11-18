@@ -2,10 +2,12 @@ package app
 
 import api.ServerBuilder
 import api.endpoints.preprocessor.PreprocessorEndpoints
+import api.endpoints.flow.ReaktoroEndpoints
 
 import akka.actor.ActorSystem
 
 import cats.effect.{ExitCode, IO, IOApp, Resource}
+import cats.implicits.toSemigroupKOps
 
 import core.services.cache.CacheService
 import core.services.flow.ReaktoroService
@@ -18,7 +20,7 @@ import org.typelevel.log4cats.slf4j.Slf4jLogger
 import org.typelevel.log4cats.Logger
 import org.http4s.client.Client
 import org.http4s.ember.client.EmberClientBuilder
-import org.http4s.Uri
+import org.http4s.{HttpRoutes, Uri}
 
 import scala.concurrent.ExecutionContext
 
@@ -41,21 +43,20 @@ object Main extends IOApp {
     )
 
   def serverBuilderResource(
-    preprocessorEndpoints: PreprocessorEndpoints
+    routes: HttpRoutes[IO]
   )(
     implicit logger: Logger[IO]
   ): Resource[IO, ServerBuilder] =
     Resource.make(
       logger.info("Creating Server Builder") *>
-        IO(new ServerBuilder(preprocessorEndpoints))
+        IO(new ServerBuilder(routes))
     )(endpoints =>
       logger.info("Shutting down ServerBuilder").handleErrorWith(_ => IO.unit)
     )
 
-  def endpointsResource(
+  def preprocessorEndpointsResource(
     reactionService: ReactionService[IO],
-    mechanismService: MechanismService[IO],
-    reaktoroService: ReaktoroService[IO]
+    mechanismService: MechanismService[IO]
   )(
     implicit logger: Logger[IO]
   ): Resource[IO, PreprocessorEndpoints] =
@@ -64,6 +65,18 @@ object Main extends IOApp {
         IO(new PreprocessorEndpoints(reactionService, mechanismService))
     )(endpoints =>
       logger.info("Shutting down Endpoints").handleErrorWith(_ => IO.unit)
+    )
+
+  def reaktoroEndpointsResource(
+    reaktoroService: ReaktoroService[IO]
+  )(
+    implicit logger: Logger[IO]
+  ): Resource[IO, ReaktoroEndpoints] =
+    Resource.make(
+      logger.info("Creating Reaktoro Endpoints") *>
+        IO(new ReaktoroEndpoints(reaktoroService))
+    )(endpoints =>
+      logger.info("Shutting down Reaktoro Endpoints").handleErrorWith(_ => IO.unit)
     )
 
   def clientResource(
@@ -136,17 +149,18 @@ object Main extends IOApp {
     val port                = config.httpConfig.port
 
     for {
-      system           <- actorSystemResource
-      client           <- clientResource
-      cacheService     <- cacheServiceResource
-      mechanismService <- mechanismServiceResource(cacheService, client, preprocessorBaseUri / "mechanism")
-      reactionService  <- reactionServiceResource(cacheService, client, preprocessorBaseUri / "reaction")
-      reaktoroService  <- reaktoroServiceResource(reactionService, client, engineBaseUri / "reaction")
-      endpoints        <- endpointsResource(reactionService, mechanismService, reaktoroService)
-      serverBuilder    <- serverBuilderResource(endpoints)
-      server           <- serverBuilder.startServer(host, port)
-      _                <- Resource.eval(logger.info("Press ENTER to terminate..."))
-      _                <- Resource.eval(IO(scala.io.StdIn.readLine))
+      system                <- actorSystemResource
+      client                <- clientResource
+      cacheService          <- cacheServiceResource
+      mechanismService      <- mechanismServiceResource(cacheService, client, preprocessorBaseUri / "mechanism")
+      reactionService       <- reactionServiceResource(cacheService, client, preprocessorBaseUri / "reaction")
+      reaktoroService       <- reaktoroServiceResource(reactionService, client, engineBaseUri)
+      preprocessorEndpoints <- preprocessorEndpointsResource(reactionService, mechanismService)
+      reaktoroEndpoints     <- reaktoroEndpointsResource(reaktoroService)
+      serverBuilder         <- serverBuilderResource(preprocessorEndpoints.routes <+> reaktoroEndpoints.routes)
+      server                <- serverBuilder.startServer(host, port)
+      _                     <- Resource.eval(logger.info("Press ENTER to terminate..."))
+      _                     <- Resource.eval(IO(scala.io.StdIn.readLine))
     } yield ()
 
   override def run(
