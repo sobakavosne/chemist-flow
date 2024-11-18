@@ -20,7 +20,7 @@ RUN sbt update
 
 COPY src/ ./src/
 
-RUN sbt compile
+RUN sbt clean compile
 
 COPY . .
 

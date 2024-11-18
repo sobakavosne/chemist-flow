@@ -1,16 +1,16 @@
-package core.domain
+package core.domain.preprocessor
 
 import io.circe.{Decoder, Encoder}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 
 type MechanismId = Int
-type StageID     = Int
+type StageId     = Int
 
 case class Mechanism(
-  id:               MechanismId,
-  name:             String,
-  family:           String,
-  activationEnergy: Float
+  mechanismId:               MechanismId,
+  mechanismName:             String,
+  mechanismType:             String,
+  mechanismActivationEnergy: Float
 )
 
 object Mechanism {
@@ -28,10 +28,10 @@ object FOLLOW {
 }
 
 case class Stage(
-  order:       StageID,
-  name:        String,
-  description: String,
-  products:    List[String]
+  stageOrder:       StageId,
+  stageName:        String,
+  stageDescription: String,
+  stageProducts:    List[String]
 )
 
 object Stage {

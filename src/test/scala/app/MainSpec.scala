@@ -1,30 +1,69 @@
 package app
 
-import api.Endpoints
+import api.endpoints.preprocessor.PreprocessorEndpoints
 import api.ServerBuilder
-import cats.effect.IO
+
+import cats.effect.{IO, Resource}
 import cats.effect.unsafe.implicits.global
-import com.comcast.ip4s.Host
-import com.comcast.ip4s.Port
+import cats.implicits.toSemigroupKOps
+
+import com.comcast.ip4s.{Host, Port}
+
+import core.services.cache.CacheService
+import core.services.flow.ReaktoroService
+import core.services.preprocessor.{MechanismService, ReactionService}
+
+import org.http4s.Uri
+import org.http4s.ember.client.EmberClientBuilder
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AsyncWordSpec
+import org.typelevel.log4cats.slf4j.Slf4jLogger
+import org.typelevel.log4cats.Logger
 
 class MainSpec extends AsyncWordSpec with Matchers with BeforeAndAfterAll {
 
+  implicit val logger: Logger[IO] = Slf4jLogger.getLogger[IO]
+
   "Main" should {
     "start the http4s server as a Resource" in {
-      implicit val endpoints = new Endpoints
-      val serverBuilder      = new ServerBuilder
-      val maybeHost          = Host.fromString("0.0.0.0")
-      val maybePort          = Port.fromInt(8081)
-      val bindingResource    = serverBuilder.startServer(maybeHost.get, maybePort.get)
 
-      bindingResource
+      val maybeHost       = Host.fromString("0.0.0.0").get
+      val maybePort       = Port.fromInt(8081).get
+      val preprocessorUri = Uri.unsafeFromString("http://localhost:8080")
+      val engineUri       = Uri.unsafeFromString("http://localhost:8082/api")
+
+      val serverResource = for {
+        client                <- EmberClientBuilder.default[IO].build
+        cacheService          <- Resource.make(
+                                   IO(new CacheService[IO])
+                                 )(_ => IO.unit)
+        mechanismService      <- Resource.make(
+                                   IO(new MechanismService[IO](cacheService, client, preprocessorUri / "mechanism"))
+                                 )(_ => IO.unit)
+        reactionService       <- Resource.make(
+                                   IO(new ReactionService[IO](cacheService, client, preprocessorUri / "reaction"))
+                                 )(_ => IO.unit)
+        reaktoroService       <- Resource.make(
+                                   IO(new ReaktoroService[IO](reactionService, client, engineUri / "reaction"))
+                                 )(_ => IO.unit)
+        preprocessorEndpoints <- Resource.make(
+                                   IO(new PreprocessorEndpoints(reactionService, mechanismService))
+                                 )(_ => IO.unit)
+        reaktoroEndpoints     <- Resource.make(
+                                   IO(new PreprocessorEndpoints(reactionService, mechanismService))
+                                 )(_ => IO.unit)
+        serverBuilder         <- Resource.make(
+                                   IO(new ServerBuilder(preprocessorEndpoints.routes <+> reaktoroEndpoints.routes))
+                                 )(_ => IO.unit)
+        server                <- serverBuilder.startServer(maybeHost, maybePort)
+      } yield server
+
+      serverResource
         .use { server =>
           IO {
             server.address.getPort shouldEqual 8081
-            // More tests here to verify specific endpoint behaviour
+            // Additional tests can verify the availability and behaviour of endpoints.
           }
         }
         .unsafeToFuture()

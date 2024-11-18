@@ -1,14 +1,14 @@
 package core.repositories
 
 import cats.effect.{Ref, Sync}
-import core.domain.{Mechanism, MechanismId}
-import core.errors.http.MechanismError
-import core.errors.http.MechanismError.CreationError
+import core.domain.preprocessor.{Mechanism, MechanismId}
+import core.errors.http.preprocessor.MechanismError
+import core.errors.http.preprocessor.MechanismError.CreationError
 import cats.implicits.toFunctorOps
 import types.MechanismRepository
 
 /**
- * InMemoryMechanismRepository is analogous to a Haskell stateful data structure that holds a `Map` within a monadic
+ * `InMemoryMechanismRepository` is analogous to a Haskell stateful data structure that holds a `Map` within a monadic
  * context. This class abstracts over an effect type `F`, which can be seen as a Haskell monad that supports side
  * effects and state management.
  *
@@ -22,6 +22,8 @@ import types.MechanismRepository
  *
  * @tparam F
  *   The abstract effect type, which could be likened to an effectful monad in Haskell (e.g., `IO`, `StateT`).
+ *
+ * type MechanismRepository m = StateT (Map MechanismId Mechanism) m
  */
 class InMemoryMechanismRepository[F[_]: Sync](state: Ref[F, Map[MechanismId, Mechanism]])
     extends MechanismRepository[F] {
@@ -47,7 +49,7 @@ class InMemoryMechanismRepository[F[_]: Sync](state: Ref[F, Map[MechanismId, Mec
    *
    * This function’s signature in Haskell might look like:
    *
-   * get :: Monad m => MechanismId -> StateT (Map MechanismId Mechanism) m (Maybe Mechanism)
+   * get :: MonadIO m => Mechanism -> MechanismRepository m (Either MechanismError Mechanism)
    *
    *   - The `Option[Mechanism]` is analogous to `Maybe Mechanism` in Haskell.
    *   - The monadic context `F` represents the effect type (like `StateT` or `IO`), enabling access to the mutable
@@ -61,7 +63,7 @@ class InMemoryMechanismRepository[F[_]: Sync](state: Ref[F, Map[MechanismId, Mec
    *
    * Haskell equivalent signature:
    *
-   * create :: Monad m => Mechanism -> StateT (Map MechanismId Mechanism) m Mechanism
+   * create :: MonadIO m => Mechanism -> MechanismRepository (Map MechanismId Mechanism) m Mechanism
    *
    *   - This function modifies the state, analogous to Haskell’s `StateT` monad transformer with `modify`.
    *   - `state.modify` here acts like `modify` in Haskell’s `State` monad, updating the map with the new Mechanism.
@@ -71,9 +73,10 @@ class InMemoryMechanismRepository[F[_]: Sync](state: Ref[F, Map[MechanismId, Mec
   def create(mechanism: Mechanism): F[Either[MechanismError, Mechanism]] = {
     state.modify { mechanisms =>
       val id = generateId(mechanisms)
-      if (mechanisms.values.exists(_.name == mechanism.name)) {
+
+      if (mechanisms.values.exists(_.mechanismName == mechanism.mechanismName)) {
         // Returns Left if a mechanism with the same name already exists
-        (mechanisms, Left(CreationError(s"Mechanism with name '${mechanism.name}' already exists")))
+        (mechanisms, Left(CreationError(s"Mechanism with name '${mechanism.mechanismName}' already exists")))
       } else {
         val newMechanism = mechanism.copy(id)
         (mechanisms + (id -> newMechanism), Right(newMechanism))
@@ -86,10 +89,8 @@ class InMemoryMechanismRepository[F[_]: Sync](state: Ref[F, Map[MechanismId, Mec
    *
    * Equivalent Haskell signature:
    *
-   * delete :: Monad m => MechanismId -> StateT (Map MechanismId Mechanism) m Bool
+   * delete :: MonadIO m => MechanismId -> MechanismRepository (Map MechanismId Mechanism) m Bool
    *
-   *   - `Option` here would be represented by `Maybe` in Haskell, where the result is either `True` (for success) or
-   *     `False`.
    *   - The `modify` function again resembles Haskell’s `StateT modify`, allowing safe state updates within an
    *     effectful context.
    */

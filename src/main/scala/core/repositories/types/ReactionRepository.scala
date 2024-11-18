@@ -1,7 +1,7 @@
 package core.repositories.types
 
-import core.domain.{Reaction, ReactionId}
-import core.errors.http.ReactionError
+import core.domain.preprocessor.{Reaction, ReactionId}
+import core.errors.http.preprocessor.ReactionError
 
 trait ReactionRepository[F[_]] {
   def get(id: ReactionId):        F[Option[Reaction]]
