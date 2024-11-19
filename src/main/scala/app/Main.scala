@@ -1,146 +1,58 @@
 package app
 
-import api.ServerBuilder
-import api.endpoints.preprocessor.PreprocessorEndpoints
-import api.endpoints.flow.ReaktoroEndpoints
-
 import akka.actor.ActorSystem
+import akka.cluster.ddata.{DistributedData, SelfUniqueAddress}
 
 import cats.effect.{ExitCode, IO, IOApp, Resource}
 import cats.implicits.toSemigroupKOps
-
-import core.services.cache.CacheService
-import core.services.flow.ReaktoroService
-import core.services.preprocessor.{MechanismService, ReactionService}
 
 import config.ConfigLoader
 import config.ConfigLoader.DefaultConfigLoader
 
 import org.typelevel.log4cats.slf4j.Slf4jLogger
 import org.typelevel.log4cats.Logger
-import org.http4s.client.Client
-import org.http4s.ember.client.EmberClientBuilder
-import org.http4s.{HttpRoutes, Uri}
 
 import scala.concurrent.ExecutionContext
 
+import app.units.SystemResources.actorSystemResource
+import app.units.ClientResources.clientResource
+import app.units.EndpointResources.{preprocessorEndpointsResource, reaktoroEndpointsResource}
+import app.units.ServerResources.serverBuilderResource
+import app.units.ServiceResources.{
+  distributedCacheServiceResource,
+  mechanismServiceResource,
+  reactionServiceResource,
+  reaktoroServiceResource
+}
+
+/**
+ * Entry point for the application. Responsible for configuring and starting all resources and services.
+ */
 object Main extends IOApp {
 
-  def actorSystemResource(
-    implicit
-    ec: ExecutionContext,
-    system: ActorSystem,
-    logger: Logger[IO]
-  ): Resource[IO, ActorSystem] =
-    Resource.make(
-      logger.info("Creating Actor System") *>
-        IO(system)
-    )(system =>
-      IO.fromFuture(IO(system.terminate())).attempt.flatMap {
-        case Right(_) => logger.info("Actor system terminated successfully")
-        case Left(ex) => logger.error(s"Actor system termination failed: ${ex.getMessage}")
-      }
-    )
-
-  def serverBuilderResource(
-    routes: HttpRoutes[IO]
-  )(
-    implicit logger: Logger[IO]
-  ): Resource[IO, ServerBuilder] =
-    Resource.make(
-      logger.info("Creating Server Builder") *>
-        IO(new ServerBuilder(routes))
-    )(endpoints =>
-      logger.info("Shutting down ServerBuilder").handleErrorWith(_ => IO.unit)
-    )
-
-  def preprocessorEndpointsResource(
-    reactionService: ReactionService[IO],
-    mechanismService: MechanismService[IO]
-  )(
-    implicit logger: Logger[IO]
-  ): Resource[IO, PreprocessorEndpoints] =
-    Resource.make(
-      logger.info("Creating Endpoints") *>
-        IO(new PreprocessorEndpoints(reactionService, mechanismService))
-    )(endpoints =>
-      logger.info("Shutting down Endpoints").handleErrorWith(_ => IO.unit)
-    )
-
-  def reaktoroEndpointsResource(
-    reaktoroService: ReaktoroService[IO]
-  )(
-    implicit logger: Logger[IO]
-  ): Resource[IO, ReaktoroEndpoints] =
-    Resource.make(
-      logger.info("Creating Reaktoro Endpoints") *>
-        IO(new ReaktoroEndpoints(reaktoroService))
-    )(endpoints =>
-      logger.info("Shutting down Reaktoro Endpoints").handleErrorWith(_ => IO.unit)
-    )
-
-  def clientResource(
-    implicit logger: Logger[IO]
-  ): Resource[IO, Client[IO]] =
-    EmberClientBuilder.default[IO].build
-
-  def mechanismServiceResource(
-    cacheService: CacheService[IO],
-    client: Client[IO],
-    baseUri: Uri
-  )(
-    implicit logger: Logger[IO]
-  ): Resource[IO, MechanismService[IO]] =
-    Resource.make(
-      logger.info("Creating Mechanism Service") *>
-        IO(new MechanismService[IO](cacheService, client, baseUri))
-    )(_ =>
-      logger.info("Shutting down Mechanism Service").handleErrorWith(_ => IO.unit)
-    )
-
-  def reactionServiceResource(
-    cacheService: CacheService[IO],
-    client: Client[IO],
-    baseUri: Uri
-  )(
-    implicit logger: Logger[IO]
-  ): Resource[IO, ReactionService[IO]] =
-    Resource.make(
-      logger.info("Creating Reaction Service") *>
-        IO(new ReactionService[IO](cacheService, client, baseUri))
-    )(_ =>
-      logger.info("Shutting down Reaction Service").handleErrorWith(_ => IO.unit)
-    )
-
-  def reaktoroServiceResource(
-    reactionService: ReactionService[IO],
-    client: Client[IO],
-    baseUri: Uri
-  )(
-    implicit logger: Logger[IO]
-  ): Resource[IO, ReaktoroService[IO]] =
-    Resource.make(
-      logger.info("Creating Reaktoro Service") *>
-        IO(new ReaktoroService[IO](reactionService, client, baseUri))
-    )(_ =>
-      logger.info("Shutting down Reaktoro Service").handleErrorWith(_ => IO.unit)
-    )
-
-  def cacheServiceResource(
-    implicit logger: Logger[IO]
-  ): Resource[IO, CacheService[IO]] =
-    Resource.make(
-      logger.info("Creating Cache Service") *> IO(new CacheService[IO])
-    )(_ =>
-      logger.info("Shutting down Cache Service").handleErrorWith(_ => IO.unit)
-    )
-
-  def runApp(
+  /**
+   * Runs the application, setting up all required resources.
+   *
+   * @param config
+   *   The configuration loader used to provide application settings.
+   * @param ec
+   *   The `ExecutionContext` used for asynchronous operations.
+   * @param system
+   *   The `ActorSystem` used for managing Akka-based concurrency.
+   * @param logger
+   *   An implicit logger instance for logging lifecycle events and errors during resource creation and application
+   *   runtime.
+   * @return
+   *   A `Resource[IO, Unit]` that encapsulates the full lifecycle of the application, ensuring that all resources are
+   *   properly initialised and released.
+   */
+  private def runApp(
     config: ConfigLoader
   )(
     implicit
     ec: ExecutionContext,
     system: ActorSystem,
+    selfUniqueAddress: SelfUniqueAddress,
     logger: Logger[IO]
   ): Resource[IO, Unit] =
     val preprocessorBaseUri = config.preprocessorHttpClientConfig.baseUri
@@ -151,7 +63,7 @@ object Main extends IOApp {
     for {
       system                <- actorSystemResource
       client                <- clientResource
-      cacheService          <- cacheServiceResource
+      cacheService          <- distributedCacheServiceResource
       mechanismService      <- mechanismServiceResource(cacheService, client, preprocessorBaseUri / "mechanism")
       reactionService       <- reactionServiceResource(cacheService, client, preprocessorBaseUri / "reaction")
       reaktoroService       <- reaktoroServiceResource(reactionService, client, engineBaseUri)
@@ -163,14 +75,24 @@ object Main extends IOApp {
       _                     <- Resource.eval(IO(scala.io.StdIn.readLine))
     } yield ()
 
+  /**
+   * Main entry point for the application.
+   *
+   * @param args
+   *   The command-line arguments passed to the application.
+   * @return
+   *   An `IO[ExitCode]` indicating the application's final exit code upon completion.
+   */
   override def run(
     args: List[String]
   ): IO[ExitCode] = {
     val config = DefaultConfigLoader
 
-    implicit val logger: Logger[IO]   = Slf4jLogger.getLogger[IO]
-    implicit val system: ActorSystem  = ActorSystem("ChemistFlowActorSystem")
-    implicit val ec: ExecutionContext = system.dispatcher
+    implicit val logger: Logger[IO]                   = Slf4jLogger.getLogger[IO]
+    implicit val system: ActorSystem                  = ActorSystem("ChemistFlowActorSystem", config.pureConfig)
+    implicit val ec: ExecutionContext                 = system.dispatcher
+    implicit val distributedData                      = DistributedData(system)
+    implicit val selfUniqueAddress: SelfUniqueAddress = distributedData.selfUniqueAddress
 
     runApp(config)
       .use(_ => IO.unit)

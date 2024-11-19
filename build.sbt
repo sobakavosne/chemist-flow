@@ -13,7 +13,8 @@ enablePlugins(DockerPlugin, JavaAppPackaging)
 Docker / packageName        := "chemist-flow"
 Docker / dockerExposedPorts := Seq(8081)
 
-Test / scalaSource := baseDirectory.value / "src" / "test" / "scala"
+Test / scalaSource       := baseDirectory.value / "src" / "test" / "scala"
+Test / parallelExecution := false
 
 lazy val root = (project in file("."))
   .settings(
@@ -35,6 +36,7 @@ lazy val root = (project in file("."))
       akkaCluster.cross(CrossVersion.for3Use2_13),
       akkaDistributedData.cross(CrossVersion.for3Use2_13),
       akkaActor.cross(CrossVersion.for3Use2_13),
+      akkaTestTyped.cross(CrossVersion.for3Use2_13)
       // akkaTest.cross(CrossVersion.for3Use2_13),
       // docker
     )

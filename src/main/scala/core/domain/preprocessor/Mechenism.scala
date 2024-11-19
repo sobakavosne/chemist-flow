@@ -35,13 +35,13 @@ case class Stage(
 )
 
 object Stage {
-  implicit val stageEncoder: Encoder[Stage] = deriveEncoder[Stage]
-  implicit val stageDecoder: Decoder[Stage] = deriveDecoder[Stage]
+  implicit val encoder: Encoder[Stage] = deriveEncoder[Stage]
+  implicit val decoder: Decoder[Stage] = deriveDecoder[Stage]
 }
 
 case class INCLUDE()
 
 object INCLUDE {
-  implicit val includeEncoder: Encoder[INCLUDE] = deriveEncoder[INCLUDE]
-  implicit val includeDecoder: Decoder[INCLUDE] = deriveDecoder[INCLUDE]
+  implicit val encoder: Encoder[INCLUDE] = deriveEncoder[INCLUDE]
+  implicit val decoder: Decoder[INCLUDE] = deriveDecoder[INCLUDE]
 }

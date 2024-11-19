@@ -1,5 +1,8 @@
 package core.errors.http.preprocessor
 
+/**
+ * Represents errors related to reactions in the HTTP preprocessor.
+ */
 sealed trait ReactionError extends Throwable {
   def message: String
   override def getMessage: String = message

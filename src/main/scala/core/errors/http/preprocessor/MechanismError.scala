@@ -1,5 +1,8 @@
 package core.errors.http.preprocessor
 
+/**
+ * Represents errors related to mechanisms in the HTTP preprocessor.
+ */
 sealed trait MechanismError extends Throwable {
   def message: String
   override def getMessage: String = message

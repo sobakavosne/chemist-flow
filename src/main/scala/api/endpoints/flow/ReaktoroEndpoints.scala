@@ -30,10 +30,26 @@ object ComputePropsRequest {
   implicit val encoder: Encoder[ComputePropsRequest] = deriveEncoder
 }
 
+/**
+ * Defines the HTTP routes for interacting with the ReaktoroService.
+ *
+ * @param reaktoroService
+ *   The service handling system property computations.
+ */
 class ReaktoroEndpoints(
   reaktoroService: ReaktoroService[IO]
 ) {
 
+  /**
+   * HTTP POST route for computing system properties for a reaction.
+   *
+   * Endpoint: `/api/system/properties`
+   *
+   * @param req
+   *   The HTTP request containing a `ComputePropsRequest` object in the body.
+   * @return
+   *   A JSON response containing the computed system properties or an error message.
+   */
   private val computeSystemPropsForReactionRoute: HttpRoutes[IO] = HttpRoutes.of[IO] {
     case req @ POST -> Root / "system" / "properties" =>
       req.as[ComputePropsRequest].flatMap {
