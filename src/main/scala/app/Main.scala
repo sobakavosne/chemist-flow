@@ -31,20 +31,25 @@ import app.units.ServiceResources.{
 object Main extends IOApp {
 
   /**
-   * Runs the application, setting up all required resources.
+   * Configures and manages the lifecycle of all resources and services required for the application.
+   *
+   * This method initialises resources such as the actor system, HTTP clients, distributed cache, services, and server.
+   * It ensures proper resource management by leveraging `Resource` for initialisation and cleanup.
    *
    * @param config
-   *   The configuration loader used to provide application settings.
+   *   The configuration loader that provides application-specific settings, such as HTTP endpoints, client
+   *   configurations, and server properties.
    * @param ec
-   *   The `ExecutionContext` used for asynchronous operations.
+   *   The `ExecutionContext` used to handle asynchronous operations across the application.
    * @param system
-   *   The `ActorSystem` used for managing Akka-based concurrency.
+   *   The `ActorSystem` used for Akka-based concurrency and distributed data.
+   * @param selfUniqueAddress
+   *   The unique address of the current actor system, used for distributed data in a cluster.
    * @param logger
-   *   An implicit logger instance for logging lifecycle events and errors during resource creation and application
-   *   runtime.
+   *   An implicit logger instance for recording lifecycle events, debugging, and error handling.
    * @return
-   *   A `Resource[IO, Unit]` that encapsulates the full lifecycle of the application, ensuring that all resources are
-   *   properly initialised and released.
+   *   A `Resource[IO, Unit]` that encapsulates the application's full lifecycle. This includes initialisation, running
+   *   the server, and ensuring all resources are properly cleaned up when the application terminates.
    */
   private def runApp(
     config: ConfigLoader

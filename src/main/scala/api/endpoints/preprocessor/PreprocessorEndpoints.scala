@@ -17,12 +17,16 @@ import core.domain.preprocessor.{MechanismDetails, Reaction, ReactionDetails}
 import core.errors.http.preprocessor.ReactionError
 
 /**
- * Defines the HTTP routes for handling reactions and mechanisms in the preprocessor.
+ * Defines the HTTP routes for handling reactions and mechanisms.
+ *
+ * This class provides endpoints for performing CRUD operations on reactions and retrieving mechanism details. Each
+ * endpoint calls the appropriate service, and returns a response in JSON format.
  *
  * @param reactionService
- *   The service that handles reactions-related operations.
+ *   The service responsible for handling reaction-related operations, such as fetching, creating, and deleting
+ *   reactions.
  * @param mechanismService
- *   The service that handles mechanisms-related operations.
+ *   The service responsible for handling mechanism-related operations, such as fetching mechanism details.
  */
 class PreprocessorEndpoints(
   reactionService:  ReactionService[IO],
@@ -32,10 +36,19 @@ class PreprocessorEndpoints(
   /**
    * HTTP GET route for fetching a reaction by its ID.
    *
+   * Endpoint: `/api/reaction/{id}`
+   *
+   * This route validates the provided ID, fetches the reaction details from the `ReactionService`, and returns the
+   * details in JSON format. If the ID is invalid or the reaction is not found, it returns an appropriate error
+   * response.
+   *
    * @param id
-   *   The ID of the reaction to fetch.
+   *   The string representation of the reaction ID to fetch.
    * @return
-   *   A `ReactionDetails` object in JSON format or an appropriate error response.
+   *   - `200 OK` with the `ReactionDetails` object in JSON format if the reaction is found.
+   *   - `400 Bad Request` if the ID is invalid.
+   *   - `404 Not Found` if no reaction with the given ID exists.
+   *   - `500 Internal Server Error` if an unexpected error occurs.
    */
   private val getReactionRoute: HttpRoutes[IO] = HttpRoutes.of[IO] {
     case GET -> Root / "reaction" / id =>
@@ -54,10 +67,17 @@ class PreprocessorEndpoints(
   /**
    * HTTP POST route for creating a new reaction.
    *
+   * Endpoint: `/api/reaction`
+   *
+   * This route reads a `Reaction` object from the request body, passes it to the `ReactionService` to create a new
+   * reaction, and returns the created reaction details in JSON format.
+   *
    * @param req
    *   The HTTP request containing the `Reaction` object in the body.
    * @return
-   *   The created `Reaction` object in JSON format or an appropriate error response.
+   *   - `201 Created` with the created `Reaction` object in JSON format on success.
+   *   - `400 Bad Request` if the request body is invalid or creation fails.
+   *   - `500 Internal Server Error` if an unexpected error occurs.
    */
   private val postReactionRoute: HttpRoutes[IO] = HttpRoutes.of[IO] {
     case req @ POST -> Root / "reaction" =>
@@ -74,10 +94,17 @@ class PreprocessorEndpoints(
   /**
    * HTTP DELETE route for deleting a reaction by its ID.
    *
+   * Endpoint: `/api/reaction/{id}`
+   *
+   * This route validates the provided ID, deletes the reaction using the `ReactionService`, and returns an appropriate
+   * response. If the ID is invalid or the deletion fails, an error response is returned.
+   *
    * @param id
-   *   The ID of the reaction to delete.
+   *   The string representation of the reaction ID to delete.
    * @return
-   *   HTTP 204 No Content on success, or an appropriate error response.
+   *   - `204 No Content` if the reaction is successfully deleted.
+   *   - `400 Bad Request` if the ID is invalid or deletion fails.
+   *   - `500 Internal Server Error` if an unexpected error occurs.
    */
   private val deleteReactionRoute: HttpRoutes[IO] = HttpRoutes.of[IO] {
     case DELETE -> Root / "reaction" / id =>
@@ -94,10 +121,19 @@ class PreprocessorEndpoints(
   /**
    * HTTP GET route for fetching a mechanism by its ID.
    *
+   * Endpoint: `/api/mechanism/{id}`
+   *
+   * This route validates the provided ID, fetches the mechanism details from the `MechanismService`, and returns the
+   * details in JSON format. If the ID is invalid or the mechanism is not found, it returns an appropriate error
+   * response.
+   *
    * @param id
-   *   The ID of the mechanism to fetch.
+   *   The string representation of the mechanism ID to fetch.
    * @return
-   *   A `MechanismDetails` object in JSON format or an appropriate error response.
+   *   - `200 OK` with the `MechanismDetails` object in JSON format if the mechanism is found.
+   *   - `400 Bad Request` if the ID is invalid.
+   *   - `404 Not Found` if no mechanism with the given ID exists.
+   *   - `500 Internal Server Error` if an unexpected error occurs.
    */
   private val getMechanismRoute: HttpRoutes[IO] = HttpRoutes.of[IO] {
     case GET -> Root / "mechanism" / id =>
@@ -113,8 +149,22 @@ class PreprocessorEndpoints(
       }
   }
 
+  /**
+   * Validates the given string as an integer ID.
+   *
+   * @param id
+   *   The string to validate.
+   * @return
+   *   An `Option[Int]` containing the valid integer ID, or `None` if the validation fails.
+   */
   private def validateId(id: String): Option[Int] = id.toIntOption
 
+  /**
+   * Combines all defined HTTP routes and applies middleware for logging.
+   *
+   * @return
+   *   A single `HttpRoutes[IO]` instance containing all endpoints.
+   */
   val routes: HttpRoutes[IO] = Logger.httpRoutes(logHeaders = false, logBody = true)(
     Router(
       "/api" -> (getReactionRoute <+> postReactionRoute <+> deleteReactionRoute <+> getMechanismRoute)
