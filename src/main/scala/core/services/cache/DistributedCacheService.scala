@@ -40,6 +40,17 @@ class DistributedCacheService[F[_]: Async](
   private val reactionDetailsCacheKey  = LWWMapKey[ReactionId, ReactionDetails]("reactionDetailsCache")
 
   /**
+   * Retrieves a mechanism from the distributed cache.
+   *
+   * @param id
+   *   The ID of the mechanism.
+   * @return
+   *   An effect wrapping an optional `Mechanism`.
+   */
+  def getMechanism(id: MechanismId): F[Option[Mechanism]] =
+    getFromCache(mechanismCacheKey, id)
+
+  /**
    * Retrieves a mechanism's details from the distributed cache.
    *
    * @param id
@@ -47,7 +58,7 @@ class DistributedCacheService[F[_]: Async](
    * @return
    *   An effect wrapping an optional `MechanismDetails`.
    */
-  def getMechanism(id: MechanismId): F[Option[MechanismDetails]] =
+  def getMechanismDetails(id: MechanismId): F[Option[MechanismDetails]] =
     getFromCache(mechanismDetailsCacheKey, id)
 
   /**
@@ -77,6 +88,17 @@ class DistributedCacheService[F[_]: Async](
     putInCache(mechanismDetailsCacheKey, id, mechanismDetails)
 
   /**
+   * Retrieves a reaction from the distributed cache.
+   *
+   * @param id
+   *   The ID of the reaction.
+   * @return
+   *   An effect wrapping an optional `ReactionDetails`.
+   */
+  def getReaction(id: ReactionId): F[Option[Reaction]] =
+    getFromCache(reactionCacheKey, id)
+
+  /**
    * Retrieves a reaction's details from the distributed cache.
    *
    * @param id
@@ -84,7 +106,7 @@ class DistributedCacheService[F[_]: Async](
    * @return
    *   An effect wrapping an optional `ReactionDetails`.
    */
-  def getReaction(id: ReactionId): F[Option[ReactionDetails]] =
+  def getReactionDetails(id: ReactionId): F[Option[ReactionDetails]] =
     getFromCache(reactionDetailsCacheKey, id)
 
   /**

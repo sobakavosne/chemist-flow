@@ -19,7 +19,7 @@ class ReactionService[F[_]: Concurrent](
 ) {
 
   def getReaction(id: ReactionId): F[ReactionDetails] =
-    distributedCache.getReaction(id).flatMap {
+    distributedCache.getReactionDetails(id).flatMap {
       case Some(cachedReaction) => cachedReaction.pure[F]
       case None                 => fetchReactionFromRemote(id)
     }

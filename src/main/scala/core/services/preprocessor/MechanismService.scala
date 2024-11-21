@@ -23,7 +23,7 @@ class MechanismService[F[_]: Concurrent](
 ) {
 
   def getMechanism(id: MechanismId): F[MechanismDetails] =
-    cacheService.getMechanism(id).flatMap {
+    cacheService.getMechanismDetails(id).flatMap {
       case Some(cachedMechanism) => cachedMechanism.pure[F]
       case None                  => fetchMechanismFromRemote(id)
     }
