@@ -128,13 +128,13 @@ object ServiceResources {
    *   A `Resource[IO, DistributedCacheService[IO]]` that manages the lifecycle of the `CacheService` instance.
    */
   def distributedCacheServiceResource(
-    implicit
-    logger: Logger[IO],
     system: ActorSystem,
     selfUniqueAddress: SelfUniqueAddress
+  )(
+    implicit logger: Logger[IO]
   ): Resource[IO, DistributedCacheService[IO]] =
     Resource.make(
-      logger.info("Creating Cache Service") *> IO(new DistributedCacheService[IO])
+      logger.info("Creating Cache Service") *> IO(new DistributedCacheService[IO](system, selfUniqueAddress))
     )(_ =>
       logger.info("Shutting down Cache Service").handleErrorWith(_ => IO.unit)
     )

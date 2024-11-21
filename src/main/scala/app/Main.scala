@@ -63,7 +63,7 @@ object Main extends IOApp {
     for {
       system                <- actorSystemResource
       client                <- clientResource
-      cacheService          <- distributedCacheServiceResource
+      cacheService          <- distributedCacheServiceResource(system, selfUniqueAddress)
       mechanismService      <- mechanismServiceResource(cacheService, client, preprocessorBaseUri / "mechanism")
       reactionService       <- reactionServiceResource(cacheService, client, preprocessorBaseUri / "reaction")
       reaktoroService       <- reaktoroServiceResource(reactionService, client, engineBaseUri)

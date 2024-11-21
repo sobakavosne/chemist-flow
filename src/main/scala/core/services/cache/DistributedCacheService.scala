@@ -1,7 +1,7 @@
 package core.services.cache
 
 import akka.actor.ActorSystem
-import akka.cluster.ddata.Replicator.{Get, ReadLocal, Update, WriteLocal}
+import akka.cluster.ddata.Replicator.{Get, ReadAll, Update, WriteAll}
 import akka.cluster.ddata.{DistributedData, LWWMap, LWWMapKey, Replicator, SelfUniqueAddress}
 import akka.util.Timeout
 import akka.pattern.ask
@@ -25,7 +25,6 @@ import scala.concurrent.duration._
  *   The effect type (e.g., `IO`, `Future`, etc.).
  */
 class DistributedCacheService[F[_]: Async](
-  implicit
   system:            ActorSystem,
   selfUniqueAddress: SelfUniqueAddress
 ) {
@@ -125,7 +124,7 @@ class DistributedCacheService[F[_]: Async](
   private def getFromCache[K, V](key: LWWMapKey[K, V], id: K): F[Option[V]] =
     Async[F].fromFuture {
       Async[F].delay {
-        (replicator ? Get(key, ReadLocal)).map {
+        (replicator ? Get(key, ReadAll(5.seconds))).map {
           case response: Replicator.GetSuccess[LWWMap[K, V]] @unchecked =>
             response.dataValue.get(id)
           case _: Replicator.NotFound[V] @unchecked                     =>
@@ -140,7 +139,7 @@ class DistributedCacheService[F[_]: Async](
   private def putInCache[K, V](key: LWWMapKey[K, V], id: K, value: V): F[Unit] =
     Async[F].fromFuture {
       Async[F].delay {
-        (replicator ? Update(key, LWWMap.empty[K, V], WriteLocal) {
+        (replicator ? Update(key, LWWMap.empty[K, V], WriteAll(5.seconds)) {
           _.put(selfUniqueAddress, id, value)
         }).map(_ => ())
       }
