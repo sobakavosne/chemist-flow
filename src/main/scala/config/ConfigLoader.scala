@@ -1,12 +1,19 @@
+/**
+ * Provides configuration classes and utilities for loading and managing application settings.
+ */
 package config
 
 import com.comcast.ip4s.{Host, Port}
 import com.typesafe.config.{Config, ConfigFactory}
+
+import org.http4s.Uri
+
 import pureconfig.{ConfigReader, ConfigSource}
 import pureconfig.error.CannotConvert
+
 import java.io.File
+
 import scala.concurrent.duration.FiniteDuration
-import org.http4s.Uri
 
 case class KafkaTopics(
   reactions:  String,
@@ -123,6 +130,20 @@ object ChemistEngineHttpClient {
 
 }
 
+/**
+ * Represents the application-wide configuration.
+ *
+ * @param kafka
+ *   The Kafka configuration.
+ * @param http
+ *   The HTTP server configuration.
+ * @param database
+ *   The database configuration.
+ * @param preprocessorHttpClient
+ *   The Chemist preprocessor HTTP client configuration.
+ * @param engineHttpClient
+ *   The Chemist engine HTTP client configuration.
+ */
 case class AppConfig(
   kafka:                  KafkaConfig,
   http:                   HttpConfig,
@@ -176,6 +197,8 @@ object ConfigLoader {
     override val databaseConfig: DatabaseConfig                              = appConfig.database
     override val preprocessorHttpClientConfig: ChemistPreprocessorHttpClient = appConfig.preprocessorHttpClient
     override val engineHttpClientConfig: ChemistEngineHttpClient             = appConfig.engineHttpClient
+
+    val pureConfig = config
   }
 
 }

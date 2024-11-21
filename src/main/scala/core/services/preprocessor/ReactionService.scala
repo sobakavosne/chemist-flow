@@ -5,7 +5,7 @@ import cats.implicits._
 import core.domain.preprocessor.{Reaction, ReactionDetails, ReactionId}
 import core.errors.http.preprocessor.ReactionError
 import core.errors.http.preprocessor.ReactionError._
-import core.services.cache.CacheService
+import core.services.cache.DistributedCacheService
 import org.http4s.client.Client
 import org.http4s.{Method, Request, Status, Uri}
 import io.circe.syntax._
@@ -13,13 +13,13 @@ import io.circe.parser.decode
 import org.http4s.circe._
 
 class ReactionService[F[_]: Concurrent](
-  cacheService: CacheService[F],
-  client:       Client[F],
-  baseUri:      Uri
+  distributedCache: DistributedCacheService[F],
+  client:           Client[F],
+  baseUri:          Uri
 ) {
 
   def getReaction(id: ReactionId): F[ReactionDetails] =
-    cacheService.getReaction(id).flatMap {
+    distributedCache.getReactionDetails(id).flatMap {
       case Some(cachedReaction) => cachedReaction.pure[F]
       case None                 => fetchReactionFromRemote(id)
     }
@@ -32,7 +32,7 @@ class ReactionService[F[_]: Concurrent](
           CreationError(s"Failed to create Reaction: ${error.getMessage}")
         }
     ).flatTap(createdReaction =>
-      cacheService.putReaction(createdReaction.reactionId, createdReaction)
+      distributedCache.putReaction(createdReaction.reactionId, createdReaction)
     )
 
   def deleteReaction(id: ReactionId): F[Either[ReactionError, Boolean]] =
@@ -40,7 +40,7 @@ class ReactionService[F[_]: Concurrent](
       .run(Request[F](Method.DELETE, baseUri / id.toString))
       .use { response =>
         response.status match {
-          case Status.NoContent => cacheService.cleanExpiredEntries.as(Right(true))
+          case Status.NoContent => distributedCache.cleanExpiredEntries.as(Right(true))
           case status           => Left(DeletionError(s"HTTP error ${status.code}: ${status.reason}")).pure[F]
         }
       }
@@ -55,7 +55,7 @@ class ReactionService[F[_]: Concurrent](
         decode[ReactionDetails](responseBody).leftMap { error =>
           DecodingError(s"Failed to parse ReactionDetails: ${error.getMessage}")
         }
-    ).flatTap(reaction => cacheService.putReactionDetails(id, reaction))
+    ).flatTap(reaction => distributedCache.putReactionDetails(id, reaction))
 
   private def makeRequest[A](
     request: Request[F],

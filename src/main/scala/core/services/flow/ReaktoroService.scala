@@ -16,12 +16,36 @@ import org.http4s.circe.toMessageSyntax
 import org.http4s.client.Client
 import org.http4s.{Method, Request, Status, Uri}
 
+/**
+ * Service for interacting with the Chemist Engine to compute system properties for reactions.
+ *
+ * @param reactionService
+ *   The service for managing reaction details.
+ * @param chemistEngineClient
+ *   The HTTP client for interacting with the Chemist Engine.
+ * @param chemistEngineUri
+ *   The base URI of the Chemist Engine.
+ * @tparam F
+ *   The effect type (e.g., `IO`, `SyncIO`, etc.).
+ */
 class ReaktoroService[F[_]: Concurrent](
   reactionService:     ReactionService[F],
   chemistEngineClient: Client[F],
   chemistEngineUri:    Uri
 ) {
 
+  /**
+   * Computes system properties for a given reaction ID.
+   *
+   * @param reactionId
+   *   The ID of the reaction.
+   * @param database
+   *   The thermodynamic database to use.
+   * @param amounts
+   *   The molecule amounts for the reaction.
+   * @return
+   *   A list of `Either` containing system properties or errors for each system state.
+   */
   def computeSystemPropsForReaction(
     reactionId: ReactionId,
     database: DataBase,
@@ -37,6 +61,18 @@ class ReaktoroService[F[_]: Concurrent](
         case Left(error)                     => Concurrent[F].raiseError(error)
       }
 
+  /**
+   * Creates a list of system states for a reaction.
+   *
+   * @param reactionDetails
+   *   The details of the reaction.
+   * @param database
+   *   The thermodynamic database to use.
+   * @param amounts
+   *   The molecule amounts for the reaction.
+   * @return
+   *   A list of `SystemState` instances.
+   */
   private def createSystemStateList(
     reactionDetails: ReactionDetails,
     database: DataBase,
@@ -62,6 +98,16 @@ class ReaktoroService[F[_]: Concurrent](
     }
   }
 
+  /**
+   * Computes the molecule amounts for a reaction based on inbound and outbound data.
+   *
+   * @param reactionDetails
+   *   The details of the reaction.
+   * @param amounts
+   *   The molecule amounts for the reaction.
+   * @return
+   *   A map of molecules to their respective amounts.
+   */
   private def computeMoleculeAmounts(
     reactionDetails: ReactionDetails,
     amounts: MoleculeAmountList
@@ -77,11 +123,27 @@ class ReaktoroService[F[_]: Concurrent](
     (inboundAmounts ++ outboundAmounts).toMap
   }
 
+  /**
+   * Sends a batch of system states to the Chemist Engine.
+   *
+   * @param systemStates
+   *   The list of system states to send.
+   * @return
+   *   A list of `Either` containing system properties or errors for each system state.
+   */
   private def sendBatchToChemistEngine(
     systemStates: List[SystemState]
   ): F[List[Either[SystemPropsError, SystemProps]]] =
     systemStates.parTraverse(sendToChemistEngine)
 
+  /**
+   * Sends a single system state to the Chemist Engine.
+   *
+   * @param systemState
+   *   The system state to send.
+   * @return
+   *   An `Either` containing the computed system properties or an error.
+   */
   private def sendToChemistEngine(
     systemState: SystemState
   ): F[Either[SystemPropsError, SystemProps]] =

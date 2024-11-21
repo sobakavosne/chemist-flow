@@ -16,11 +16,27 @@ import core.services.preprocessor.{MechanismService, ReactionService}
 import core.domain.preprocessor.{MechanismDetails, Reaction, ReactionDetails}
 import core.errors.http.preprocessor.ReactionError
 
+/**
+ * Defines the HTTP routes for handling reactions and mechanisms in the preprocessor.
+ *
+ * @param reactionService
+ *   The service that handles reactions-related operations.
+ * @param mechanismService
+ *   The service that handles mechanisms-related operations.
+ */
 class PreprocessorEndpoints(
   reactionService:  ReactionService[IO],
   mechanismService: MechanismService[IO]
 ) {
 
+  /**
+   * HTTP GET route for fetching a reaction by its ID.
+   *
+   * @param id
+   *   The ID of the reaction to fetch.
+   * @return
+   *   A `ReactionDetails` object in JSON format or an appropriate error response.
+   */
   private val getReactionRoute: HttpRoutes[IO] = HttpRoutes.of[IO] {
     case GET -> Root / "reaction" / id =>
       validateId(id) match {
@@ -35,6 +51,14 @@ class PreprocessorEndpoints(
       }
   }
 
+  /**
+   * HTTP POST route for creating a new reaction.
+   *
+   * @param req
+   *   The HTTP request containing the `Reaction` object in the body.
+   * @return
+   *   The created `Reaction` object in JSON format or an appropriate error response.
+   */
   private val postReactionRoute: HttpRoutes[IO] = HttpRoutes.of[IO] {
     case req @ POST -> Root / "reaction" =>
       req.as[Reaction].flatMap { reaction =>
@@ -47,6 +71,14 @@ class PreprocessorEndpoints(
       }
   }
 
+  /**
+   * HTTP DELETE route for deleting a reaction by its ID.
+   *
+   * @param id
+   *   The ID of the reaction to delete.
+   * @return
+   *   HTTP 204 No Content on success, or an appropriate error response.
+   */
   private val deleteReactionRoute: HttpRoutes[IO] = HttpRoutes.of[IO] {
     case DELETE -> Root / "reaction" / id =>
       validateId(id) match {
@@ -59,6 +91,14 @@ class PreprocessorEndpoints(
       }
   }
 
+  /**
+   * HTTP GET route for fetching a mechanism by its ID.
+   *
+   * @param id
+   *   The ID of the mechanism to fetch.
+   * @return
+   *   A `MechanismDetails` object in JSON format or an appropriate error response.
+   */
   private val getMechanismRoute: HttpRoutes[IO] = HttpRoutes.of[IO] {
     case GET -> Root / "mechanism" / id =>
       validateId(id) match {
