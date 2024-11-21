@@ -1,0 +1,275 @@
+<!DOCTYPE html><html data-pathToRoot="../../"><head><meta charset="utf-8"></meta><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"></meta><title>InMemoryReactionRepository</title><link rel="shortcut icon" type="image/x-icon" href="../../favicon.ico"></link><script type="text/javascript" src="../../scripts/theme.js"></script><script type="text/javascript" src="../../scripts/searchData.js" defer="true"></script><script type="text/javascript" src="../../scripts/scastieConfiguration.js" defer="true"></script><link rel="stylesheet" href="../../styles/theme/bundle.css"></link><link rel="stylesheet" href="../../styles/theme/components/bundle.css"></link><link rel="stylesheet" href="../../styles/theme/components/button/bundle.css"></link><link rel="stylesheet" href="../../styles/theme/layout/bundle.css"></link><link rel="stylesheet" href="../../styles/nord-light.css"></link><link rel="stylesheet" href="../../styles/dotty-icons.css"></link><link rel="stylesheet" href="../../styles/filter-bar.css"></link><link rel="stylesheet" href="../../styles/code-snippets.css"></link><link rel="stylesheet" href="../../styles/searchbar.css"></link><link rel="stylesheet" href="../../styles/social-links.css"></link><link rel="stylesheet" href="../../styles/versions-dropdown.css"></link><link rel="stylesheet" href="../../styles/content-contributors.css"></link><link rel="stylesheet" href="../../styles/fontawesome.css"></link><script type="text/javascript" src="../../hljs/highlight.pack.js" defer="true"></script><script type="text/javascript" src="../../scripts/hljs-scala3.js" defer="true"></script><script type="text/javascript" src="../../scripts/ux.js" defer="true"></script><script type="text/javascript" src="../../scripts/common/component.js" defer="true"></script><script type="text/javascript" src="../../scripts/common/utils.js" defer="true"></script><script type="text/javascript" src="../../scripts/components/FilterBar.js" defer="true"></script><script type="text/javascript" src="../../scripts/components/DocumentableList.js" defer="true"></script><script type="text/javascript" src="../../scripts/components/Input.js" defer="true"></script><script type="text/javascript" src="../../scripts/components/FilterGroup.js" defer="true"></script><script type="text/javascript" src="../../scripts/components/Filter.js" defer="true"></script><script type="text/javascript" src="../../scripts/scaladoc-scalajs.js" defer="true"></script><script type="text/javascript" src="../../scripts/contributors.js" defer="true"></script><script type="text/javascript" src="https://code.jquery.com/jquery-3.5.1.min.js" defer="true"></script><script type="text/javascript" src="https://d3js.org/d3.v6.min.js" defer="true"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/graphlib-dot@0.6.2/dist/graphlib-dot.min.js" defer="true"></script><script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/dagre-d3/0.6.1/dagre-d3.min.js" defer="true"></script><script type="text/javascript" src="https://scastie.scala-lang.org/embedded.js" defer="true"></script><script type="text/javascript" src="../../scripts/data.js" defer="true"></script><link rel="stylesheet" href="../../styles/apistyles.css"></link><script>var pathToRoot = "../../";</script></head><body><div id=""><div id="header" class="body-small"><div class="header-container-left"><a href="../../" class="logo-container"><span class="project-name h300">.</span></a><span onclick="dropdownHandler(event)" class="text-button with-arrow" id="dropdown-trigger"><a><div class="projectVersion">0.1.0-SNAPSHOT</div></a></span><div id="version-dropdown" class="dropdown-menu"></div></div><div class="header-container-right"><button id="search-toggle" class="icon-button"></button><span id="theme-toggle" class="icon-button"></span><span id="mobile-menu-toggle" class="icon-button hamburger"></span></div></div><div id="mobile-menu"><div class="mobile-menu-header body-small"><span class="mobile-menu-logo"><span class="project-name h300">.</span></span><button id="mobile-menu-close" class="icon-button close"></button></div><div class="mobile-menu-container body-medium"><input id="mobile-scaladoc-searchbar-input" class="scaladoc-searchbar-input" type="search" placeholder="Find anything"></input><span id="mobile-theme-toggle" class="mobile-menu-item mode"></span></div></div><span id="mobile-sidebar-toggle" class="floating-button"></span><div id="leftColumn" class="body-small"><div class="switcher-container"><a id="api-nav-button" class="switcher h100 selected" href="../../index.html">API</a></div><nav id="api-nav" class="side-menu"><div class="ni n0"><span class="nh "><button class="ar icon-button "></button><a href="../../infrastructure/http.html"><span class="micon pa"></span><span>infrastructure.http</span></a></span><div class="ni n1 "><span class="nh "><a href="../../infrastructure/http/HttpClient.html"><span class="micon cl"></span><span>HttpClient</span></a></span></div><div class="ni n1 "><span class="nh "><a href="../../infrastructure/http/HttpClient$.html"><span class="micon ob"></span><span>HttpClient</span></a></span></div></div><div class="ni n0 expanded"><span class="nh h100 expanded cs"><button class="ar icon-button expanded"></button><a href="../../core.html"><span class="micon pa"></span><span>core</span></a></span><div class="ni n1"><span class="nh "><button class="ar icon-button "></button><a href="../domain.html"><span class="micon pa"></span><span>domain</span></a></span><div class="ni n2"><span class="nh "><button class="ar icon-button "></button><a href="../domain/flow.html"><span class="micon pa"></span><span>flow</span></a></span><div class="ni n3 "><span class="nh "><a href="../domain/flow/ActivityInfo.html"><span class="micon cl"></span><span>ActivityInfo</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../domain/flow/ActivityInfo$.html"><span class="micon ob"></span><span>ActivityInfo</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../domain/flow/Amount.html"><span class="micon cl"></span><span>Amount</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../domain/flow/Amount$.html"><span class="micon ob"></span><span>Amount</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../domain/flow/DataBase.html"><span class="micon cl"></span><span>DataBase</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../domain/flow/DataBase$.html"><span class="micon ob"></span><span>DataBase</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../domain/flow/EnergyInfo.html"><span class="micon cl"></span><span>EnergyInfo</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../domain/flow/EnergyInfo$.html"><span class="micon ob"></span><span>EnergyInfo</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../domain/flow/HeatCapacity.html"><span class="micon cl"></span><span>HeatCapacity</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../domain/flow/HeatCapacity$.html"><span class="micon ob"></span><span>HeatCapacity</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../domain/flow/MoleFraction.html"><span class="micon cl"></span><span>MoleFraction</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../domain/flow/MoleFraction$.html"><span class="micon ob"></span><span>MoleFraction</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../domain/flow/MoleculeAmountList.html"><span class="micon cl"></span><span>MoleculeAmountList</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../domain/flow/MoleculeAmountList$.html"><span class="micon ob"></span><span>MoleculeAmountList</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../domain/flow/Phase.html"><span class="micon cl"></span><span>Phase</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../domain/flow/Phase$.html"><span class="micon ob"></span><span>Phase</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../domain/flow/Property.html"><span class="micon cl"></span><span>Property</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../domain/flow/Property$.html"><span class="micon ob"></span><span>Property</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../domain/flow/SystemProps.html"><span class="micon cl"></span><span>SystemProps</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../domain/flow/SystemProps$.html"><span class="micon ob"></span><span>SystemProps</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../domain/flow/SystemState.html"><span class="micon cl"></span><span>SystemState</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../domain/flow/SystemState$.html"><span class="micon ob"></span><span>SystemState</span></a></span></div></div><div class="ni n2"><span class="nh "><button class="ar icon-button "></button><a href="../domain/preprocessor.html"><span class="micon pa"></span><span>preprocessor</span></a></span><div class="ni n3 "><span class="nh "><a href="../domain/preprocessor/ACCELERATE.html"><span class="micon cl"></span><span>ACCELERATE</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../domain/preprocessor/ACCELERATE$.html"><span class="micon ob"></span><span>ACCELERATE</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../domain/preprocessor/Catalyst.html"><span class="micon cl"></span><span>Catalyst</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../domain/preprocessor/Catalyst$.html"><span class="micon ob"></span><span>Catalyst</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../domain/preprocessor/Condition.html"><span class="micon cl"></span><span>Condition</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../domain/preprocessor/Condition$.html"><span class="micon ob"></span><span>Condition</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../domain/preprocessor/EMechanism.html"><span class="micon cl"></span><span>EMechanism</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../domain/preprocessor/EStage.html"><span class="micon cl"></span><span>EStage</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../domain/preprocessor/Explain.html"><span class="micon tr"></span><span>Explain</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../domain/preprocessor/Explain$.html"><span class="micon ob"></span><span>Explain</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../domain/preprocessor/FOLLOW.html"><span class="micon cl"></span><span>FOLLOW</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../domain/preprocessor/FOLLOW$.html"><span class="micon ob"></span><span>FOLLOW</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../domain/preprocessor/IAccelerate.html"><span class="micon cl"></span><span>IAccelerate</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../domain/preprocessor/IAccelerate$.html"><span class="micon ob"></span><span>IAccelerate</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../domain/preprocessor/ICatalyst.html"><span class="micon cl"></span><span>ICatalyst</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../domain/preprocessor/ICatalyst$.html"><span class="micon ob"></span><span>ICatalyst</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../domain/preprocessor/IMolecule.html"><span class="micon cl"></span><span>IMolecule</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../domain/preprocessor/IMolecule$.html"><span class="micon ob"></span><span>IMolecule</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../domain/preprocessor/INCLUDE.html"><span class="micon cl"></span><span>INCLUDE</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../domain/preprocessor/INCLUDE$.html"><span class="micon ob"></span><span>INCLUDE</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../domain/preprocessor/IProductFrom.html"><span class="micon cl"></span><span>IProductFrom</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../domain/preprocessor/IProductFrom$.html"><span class="micon ob"></span><span>IProductFrom</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../domain/preprocessor/IReaction.html"><span class="micon cl"></span><span>IReaction</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../domain/preprocessor/IReaction$.html"><span class="micon ob"></span><span>IReaction</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../domain/preprocessor/IReagentIn.html"><span class="micon cl"></span><span>IReagentIn</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../domain/preprocessor/IReagentIn$.html"><span class="micon ob"></span><span>IReagentIn</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../domain/preprocessor/InboundReagent.html"><span class="micon cl"></span><span>InboundReagent</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../domain/preprocessor/InboundReagent$.html"><span class="micon ob"></span><span>InboundReagent</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../domain/preprocessor/Interactant.html"><span class="micon tr"></span><span>Interactant</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../domain/preprocessor/Interactant$.html"><span class="micon ob"></span><span>Interactant</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../domain/preprocessor/Mechanism.html"><span class="micon cl"></span><span>Mechanism</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../domain/preprocessor/Mechanism$.html"><span class="micon ob"></span><span>Mechanism</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../domain/preprocessor/MechanismDetails.html"><span class="micon cl"></span><span>MechanismDetails</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../domain/preprocessor/MechanismDetails$.html"><span class="micon ob"></span><span>MechanismDetails</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../domain/preprocessor/Molecule.html"><span class="micon cl"></span><span>Molecule</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../domain/preprocessor/Molecule$.html"><span class="micon ob"></span><span>Molecule</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../domain/preprocessor/OutboundProduct.html"><span class="micon cl"></span><span>OutboundProduct</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../domain/preprocessor/OutboundProduct$.html"><span class="micon ob"></span><span>OutboundProduct</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../domain/preprocessor/PRODUCT_FROM.html"><span class="micon cl"></span><span>PRODUCT_FROM</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../domain/preprocessor/PRODUCT_FROM$.html"><span class="micon ob"></span><span>PRODUCT_FROM</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../domain/preprocessor/ProcessDetails.html"><span class="micon cl"></span><span>ProcessDetails</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../domain/preprocessor/ProcessDetails$.html"><span class="micon ob"></span><span>ProcessDetails</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../domain/preprocessor/REAGENT_IN.html"><span class="micon cl"></span><span>REAGENT_IN</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../domain/preprocessor/REAGENT_IN$.html"><span class="micon ob"></span><span>REAGENT_IN</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../domain/preprocessor/Reaction.html"><span class="micon cl"></span><span>Reaction</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../domain/preprocessor/Reaction$.html"><span class="micon ob"></span><span>Reaction</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../domain/preprocessor/ReactionDetails.html"><span class="micon cl"></span><span>ReactionDetails</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../domain/preprocessor/ReactionDetails$.html"><span class="micon ob"></span><span>ReactionDetails</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../domain/preprocessor/Stage.html"><span class="micon cl"></span><span>Stage</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../domain/preprocessor/Stage$.html"><span class="micon ob"></span><span>Stage</span></a></span></div></div></div><div class="ni n1"><span class="nh "><button class="ar icon-button "></button><a href="../errors/http.html"><span class="micon pa"></span><span>errors.http</span></a></span><div class="ni n2"><span class="nh "><button class="ar icon-button "></button><a href="../errors/http/flow.html"><span class="micon pa"></span><span>flow</span></a></span><div class="ni n3 "><span class="nh "><a href="../errors/http/flow/SystemPropsError.html"><span class="micon tr"></span><span>SystemPropsError</span></a></span></div><div class="ni n3"><span class="nh "><button class="ar icon-button "></button><a href="../errors/http/flow/SystemPropsError$.html"><span class="micon ob"></span><span>SystemPropsError</span></a></span><div class="ni n4 "><span class="nh "><a href="../errors/http/flow/SystemPropsError$$BadRequestError.html"><span class="micon cl"></span><span>BadRequestError</span></a></span></div><div class="ni n4 "><span class="nh "><a href="../errors/http/flow/SystemPropsError$$ChemistEngineError.html"><span class="micon cl"></span><span>ChemistEngineError</span></a></span></div></div></div><div class="ni n2"><span class="nh "><button class="ar icon-button "></button><a href="../errors/http/preprocessor.html"><span class="micon pa"></span><span>preprocessor</span></a></span><div class="ni n3 "><span class="nh "><a href="../errors/http/preprocessor/MechanismError.html"><span class="micon tr"></span><span>MechanismError</span></a></span></div><div class="ni n3"><span class="nh "><button class="ar icon-button "></button><a href="../errors/http/preprocessor/MechanismError$.html"><span class="micon ob"></span><span>MechanismError</span></a></span><div class="ni n4 "><span class="nh "><a href="../errors/http/preprocessor/MechanismError$$CreationError.html"><span class="micon cl"></span><span>CreationError</span></a></span></div><div class="ni n4 "><span class="nh "><a href="../errors/http/preprocessor/MechanismError$$DecodingError.html"><span class="micon cl"></span><span>DecodingError</span></a></span></div><div class="ni n4 "><span class="nh "><a href="../errors/http/preprocessor/MechanismError$$DeletionError.html"><span class="micon cl"></span><span>DeletionError</span></a></span></div><div class="ni n4 "><span class="nh "><a href="../errors/http/preprocessor/MechanismError$$HttpError.html"><span class="micon cl"></span><span>HttpError</span></a></span></div><div class="ni n4 "><span class="nh "><a href="../errors/http/preprocessor/MechanismError$$NetworkError.html"><span class="micon cl"></span><span>NetworkError</span></a></span></div><div class="ni n4 "><span class="nh "><a href="../errors/http/preprocessor/MechanismError$$NotFoundError.html"><span class="micon cl"></span><span>NotFoundError</span></a></span></div></div><div class="ni n3 "><span class="nh "><a href="../errors/http/preprocessor/ReactionError.html"><span class="micon tr"></span><span>ReactionError</span></a></span></div><div class="ni n3"><span class="nh "><button class="ar icon-button "></button><a href="../errors/http/preprocessor/ReactionError$.html"><span class="micon ob"></span><span>ReactionError</span></a></span><div class="ni n4 "><span class="nh "><a href="../errors/http/preprocessor/ReactionError$$CreationError.html"><span class="micon cl"></span><span>CreationError</span></a></span></div><div class="ni n4 "><span class="nh "><a href="../errors/http/preprocessor/ReactionError$$DecodingError.html"><span class="micon cl"></span><span>DecodingError</span></a></span></div><div class="ni n4 "><span class="nh "><a href="../errors/http/preprocessor/ReactionError$$DeletionError.html"><span class="micon cl"></span><span>DeletionError</span></a></span></div><div class="ni n4 "><span class="nh "><a href="../errors/http/preprocessor/ReactionError$$HttpError.html"><span class="micon cl"></span><span>HttpError</span></a></span></div><div class="ni n4 "><span class="nh "><a href="../errors/http/preprocessor/ReactionError$$NetworkError.html"><span class="micon cl"></span><span>NetworkError</span></a></span></div><div class="ni n4 "><span class="nh "><a href="../errors/http/preprocessor/ReactionError$$NotFoundError.html"><span class="micon cl"></span><span>NotFoundError</span></a></span></div></div></div></div><div class="ni n1 expanded"><span class="nh h100 expanded cs"><button class="ar icon-button expanded"></button><a href="../repositories.html"><span class="micon pa"></span><span>repositories</span></a></span><div class="ni n2"><span class="nh "><button class="ar icon-button "></button><a href="types.html"><span class="micon pa"></span><span>types</span></a></span><div class="ni n3 "><span class="nh "><a href="types/MechanismRepository.html"><span class="micon tr"></span><span>MechanismRepository</span></a></span></div><div class="ni n3 "><span class="nh "><a href="types/ReactionRepository.html"><span class="micon tr"></span><span>ReactionRepository</span></a></span></div></div><div class="ni n2 "><span class="nh "><a href="InMemoryMechanismRepository.html"><span class="micon cl"></span><span>InMemoryMechanismRepository</span></a></span></div><div class="ni n2 expanded"><span class="nh h100 selected"><a href="#"><span class="micon cl"></span><span>InMemoryReactionRepository</span></a></span></div><div class="ni n2 "><span class="nh "><a href="Neo4jReactionRepository.html"><span class="micon cl"></span><span>Neo4jReactionRepository</span></a></span></div></div><div class="ni n1"><span class="nh "><button class="ar icon-button "></button><a href="../services.html"><span class="micon pa"></span><span>services</span></a></span><div class="ni n2"><span class="nh "><button class="ar icon-button "></button><a href="../services/cache.html"><span class="micon pa"></span><span>cache</span></a></span><div class="ni n3 "><span class="nh "><a href="../services/cache/CacheService.html"><span class="micon cl"></span><span>CacheService</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../services/cache/DistributedCacheService.html"><span class="micon cl"></span><span>DistributedCacheService</span></a></span></div></div><div class="ni n2"><span class="nh "><button class="ar icon-button "></button><a href="../services/flow.html"><span class="micon pa"></span><span>flow</span></a></span><div class="ni n3 "><span class="nh "><a href="../services/flow/ReaktoroService.html"><span class="micon cl"></span><span>ReaktoroService</span></a></span></div></div><div class="ni n2"><span class="nh "><button class="ar icon-button "></button><a href="../services/preprocessor.html"><span class="micon pa"></span><span>preprocessor</span></a></span><div class="ni n3 "><span class="nh "><a href="../services/preprocessor/MechanismService.html"><span class="micon cl"></span><span>MechanismService</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../services/preprocessor/ReactionService.html"><span class="micon cl"></span><span>ReactionService</span></a></span></div></div></div></div><div class="ni n0"><span class="nh "><button class="ar icon-button "></button><a href="../../config.html"><span class="micon pa"></span><span>config</span></a></span><div class="ni n1 "><span class="nh "><a href="../../config/AppConfig.html"><span class="micon cl"></span><span>AppConfig</span></a></span></div><div class="ni n1 "><span class="nh "><a href="../../config/AppConfig$.html"><span class="micon ob"></span><span>AppConfig</span></a></span></div><div class="ni n1 "><span class="nh "><a href="../../config/ChemistEngineHttpClient.html"><span class="micon cl"></span><span>ChemistEngineHttpClient</span></a></span></div><div class="ni n1 "><span class="nh "><a href="../../config/ChemistEngineHttpClient$.html"><span class="micon ob"></span><span>ChemistEngineHttpClient</span></a></span></div><div class="ni n1 "><span class="nh "><a href="../../config/ChemistPreprocessorHttpClient.html"><span class="micon cl"></span><span>ChemistPreprocessorHttpClient</span></a></span></div><div class="ni n1 "><span class="nh "><a href="../../config/ChemistPreprocessorHttpClient$.html"><span class="micon ob"></span><span>ChemistPreprocessorHttpClient</span></a></span></div><div class="ni n1 "><span class="nh "><a href="../../config/ConfigLoader.html"><span class="micon tr"></span><span>ConfigLoader</span></a></span></div><div class="ni n1"><span class="nh "><button class="ar icon-button "></button><a href="../../config/ConfigLoader$.html"><span class="micon ob"></span><span>ConfigLoader</span></a></span><div class="ni n2 "><span class="nh "><a href="../../config/ConfigLoader$$DefaultConfigLoader$.html"><span class="micon ob"></span><span>DefaultConfigLoader</span></a></span></div></div><div class="ni n1 "><span class="nh "><a href="../../config/DatabaseConfig.html"><span class="micon cl"></span><span>DatabaseConfig</span></a></span></div><div class="ni n1 "><span class="nh "><a href="../../config/DatabaseConfig$.html"><span class="micon ob"></span><span>DatabaseConfig</span></a></span></div><div class="ni n1 "><span class="nh "><a href="../../config/HttpClientPool.html"><span class="micon cl"></span><span>HttpClientPool</span></a></span></div><div class="ni n1 "><span class="nh "><a href="../../config/HttpClientTimeout.html"><span class="micon cl"></span><span>HttpClientTimeout</span></a></span></div><div class="ni n1 "><span class="nh "><a href="../../config/HttpConfig.html"><span class="micon cl"></span><span>HttpConfig</span></a></span></div><div class="ni n1 "><span class="nh "><a href="../../config/HttpConfig$.html"><span class="micon ob"></span><span>HttpConfig</span></a></span></div><div class="ni n1 "><span class="nh "><a href="../../config/KafkaConfig.html"><span class="micon cl"></span><span>KafkaConfig</span></a></span></div><div class="ni n1 "><span class="nh "><a href="../../config/KafkaConfig$.html"><span class="micon ob"></span><span>KafkaConfig</span></a></span></div><div class="ni n1 "><span class="nh "><a href="../../config/KafkaTopics.html"><span class="micon cl"></span><span>KafkaTopics</span></a></span></div><div class="ni n1 "><span class="nh "><a href="../../config/KafkaTopics$.html"><span class="micon ob"></span><span>KafkaTopics</span></a></span></div></div><div class="ni n0"><span class="nh "><button class="ar icon-button "></button><a href="../../app.html"><span class="micon pa"></span><span>app</span></a></span><div class="ni n1"><span class="nh "><button class="ar icon-button "></button><a href="../../app/units.html"><span class="micon pa"></span><span>units</span></a></span><div class="ni n2 "><span class="nh "><a href="../../app/units/ClientResources$.html"><span class="micon ob"></span><span>ClientResources</span></a></span></div><div class="ni n2 "><span class="nh "><a href="../../app/units/EndpointResources$.html"><span class="micon ob"></span><span>EndpointResources</span></a></span></div><div class="ni n2 "><span class="nh "><a href="../../app/units/ServerResources$.html"><span class="micon ob"></span><span>ServerResources</span></a></span></div><div class="ni n2 "><span class="nh "><a href="../../app/units/ServiceResources$.html"><span class="micon ob"></span><span>ServiceResources</span></a></span></div><div class="ni n2 "><span class="nh "><a href="../../app/units/SystemResources$.html"><span class="micon ob"></span><span>SystemResources</span></a></span></div></div><div class="ni n1 "><span class="nh "><a href="../../app/Main$.html"><span class="micon ob"></span><span>Main</span></a></span></div></div><div class="ni n0"><span class="nh "><button class="ar icon-button "></button><a href="../../api.html"><span class="micon pa"></span><span>api</span></a></span><div class="ni n1"><span class="nh "><button class="ar icon-button "></button><a href="../../api/endpoints.html"><span class="micon pa"></span><span>endpoints</span></a></span><div class="ni n2"><span class="nh "><button class="ar icon-button "></button><a href="../../api/endpoints/flow.html"><span class="micon pa"></span><span>flow</span></a></span><div class="ni n3 "><span class="nh "><a href="../../api/endpoints/flow/ComputePropsRequest.html"><span class="micon cl"></span><span>ComputePropsRequest</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../../api/endpoints/flow/ComputePropsRequest$.html"><span class="micon ob"></span><span>ComputePropsRequest</span></a></span></div><div class="ni n3 "><span class="nh "><a href="../../api/endpoints/flow/ReaktoroEndpoints.html"><span class="micon cl"></span><span>ReaktoroEndpoints</span></a></span></div></div><div class="ni n2"><span class="nh "><button class="ar icon-button "></button><a href="../../api/endpoints/preprocessor.html"><span class="micon pa"></span><span>preprocessor</span></a></span><div class="ni n3 "><span class="nh "><a href="../../api/endpoints/preprocessor/PreprocessorEndpoints.html"><span class="micon cl"></span><span>PreprocessorEndpoints</span></a></span></div></div></div><div class="ni n1 "><span class="nh "><a href="../../api/ErrorHandler$.html"><span class="micon ob"></span><span>ErrorHandler</span></a></span></div><div class="ni n1 "><span class="nh "><a href="../../api/ErrorResponse.html"><span class="micon cl"></span><span>ErrorResponse</span></a></span></div><div class="ni n1 "><span class="nh "><a href="../../api/ServerBuilder.html"><span class="micon cl"></span><span>ServerBuilder</span></a></span></div></div></nav></div><div id="footer" class="body-small"><div class="left-container">Generated with</div><div class="right-container"><div class="text"></div></div><div class="text-mobile"></div></div><div id="scaladoc-searchBar"></div><div id="main"><div class="breadcrumbs container"><a href="../../index.html">.</a>/<a href="../../core.html">core</a>/<a href="../repositories.html">core.repositories</a>/<a href="InMemoryReactionRepository.html">InMemoryReactionRepository</a></div><div id="content" class="body-medium"><div><div class="cover-header">
+ <span class="icon"><span class="micon cl"></span></span>
+ <h1 class="h600 single">InMemoryReactionRepository</h1>
+</div>
+<div class="fqname body-large">
+ <span>core.repositories.InMemoryReactionRepository</span>
+</div>
+<div class="main-signature mono-small-block">
+ <div class="signature">
+  <span class="signature-short"><span class="modifiers"></span><span class="kind"><span t="k">class </span></span><a href="InMemoryReactionRepository.html" t="n" class="documentableName ">InMemoryReactionRepository</a>[<span t="k"></span><span data-unresolved-link="" t="t">F</span>[<span t="t">_</span>]](<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">state</span>: <a href="https://typelevel.org/cats-effect/api/3.x/cats/effect/kernel/Ref.html" t="t">Ref</a>[<span data-unresolved-link="" t="t">F</span>, <span data-unresolved-link="" t="t">Map</span>[<a href="../domain/preprocessor.html#ReactionId-0" t="t">ReactionId</a>, <a href="../domain/preprocessor/Reaction.html" t="t">Reaction</a>]])(<span t="k">implicit </span><span t="k"></span><span data-unresolved-link="" t="n">evidence$1</span>: <a href="https://typelevel.org/cats-effect/api/3.x/cats/effect/kernel/Sync.html" t="t">Sync</a>[<span data-unresolved-link="" t="t">F</span>])<span t="k"> extends </span><a href="types/ReactionRepository.html" t="t">ReactionRepository</a>[<span t="t">F</span>]</span><span class="signature-long"></span>
+ </div>
+</div>
+<div class="cover">
+ <div class="doc">
+  <p>An in-memory implementation of the <code>ReactionRepository</code> for testing and local use.</p>
+ </div>
+ <section id="attributes">
+  <h2 class="h500">Type parameters</h2>
+  <dl class="attributes">
+   <dt class="body-small">
+    F
+   </dt>
+   <dd class="body-medium">
+    <p>The effect type (e.g., <code>IO</code>, <code>SyncIO</code>, etc.).</p>
+   </dd>
+  </dl>
+  <h2 class="h500">Value parameters</h2>
+  <dl class="attributes">
+   <dt class="body-small">
+    state
+   </dt>
+   <dd class="body-medium">
+    <p>A reference to a mutable map representing the current state of stored reactions.</p>
+   </dd>
+  </dl>
+  <h2 class="h500">Attributes</h2>
+  <dl class="attributes">
+   <dt class="body-small">
+    Source
+   </dt>
+   <dd class="body-medium">
+    <a href="https://github.com/sobakavosne/chemist-flow/blob/e756593c5459ec8010c1eaab907de35ed7eeb710/src/main/scala/core/repositories/InMemoryReactionRepository.scala#L18" target="_blank">InMemoryReactionRepository.scala</a>
+   </dd>
+   <dt class="body-small">
+    Graph
+   </dt>
+   <dd class="body-medium">
+    <div id="inheritance-diagram" class="diagram-class showGraph">
+     <button type="button" class="label-only-button" onclick="zoomOut()">Reset zoom</button><button type="button" class="label-only-button" onclick="hideGraph()">Hide graph</button><button type="button" class="label-only-button" onclick="showGraph()">Show graph</button>
+     <svg id="graph"></svg>
+     <script type="text/dot" id="dot"> digraph g {
+ node0 [id=node0, label="<span style=\"color: #FFFFFF;\">class <a href=\"InMemoryReactionRepository.html\" t=\"n\">InMemoryReactionRepository</a>[<span t=\"t\">F</span>]</span>", class="class vertex"];
+node1 [id=node1, label="<span style=\"color: #FFFFFF;\">class <span data-unresolved-link=\"\" t=\"n\">Object</span></span>", class="class vertex"];
+node2 [id=node2, label="<span style=\"color: #FFFFFF;\">class <span data-unresolved-link=\"\" t=\"n\">Any</span></span>", class="class vertex"];
+node3 [id=node3, label="<span style=\"color: #FFFFFF;\">trait <span data-unresolved-link=\"\" t=\"n\">Matchable</span></span>", class="trait vertex"];
+node4 [id=node4, label="<span style=\"color: #FFFFFF;\">trait <a href=\"types/ReactionRepository.html\" t=\"n\">ReactionRepository</a>[<span t=\"t\">F</span>]</span>", class="trait vertex"];
+
+
+ node0 -> node1;
+node1 -> node2;
+node1 -> node3;
+node3 -> node2;
+node0 -> node4;
+node4 -> node1;
+
+}
+</script>
+    </div>
+   </dd>
+   <dt class="body-small">
+    Supertypes
+   </dt>
+   <dd class="body-medium">
+    <div class="mono-small-block supertypes">
+     <div>
+      trait <a href="types/ReactionRepository.html" t="n">ReactionRepository</a>[<span t="t">F</span>]
+     </div>
+     <div>
+      class <span data-unresolved-link="" t="n">Object</span>
+     </div>
+     <div>
+      trait <span data-unresolved-link="" t="n">Matchable</span>
+     </div>
+     <div>
+      class <span data-unresolved-link="" t="n">Any</span>
+     </div><span></span>
+    </div>
+   </dd>
+  </dl>
+ </section>
+</div>
+<section id="members-list">
+ <h2 class="h500">Members list</h2>
+ <div class="documentableFilter">
+  <div class="filtersContainer"></div><input class="filterableInput" placeholder="Filter by any phrase" data-test-id="filterBarInput" type="search"><button class="clearButton label-only-button" data-test-id="filterBarClearButton">Clear all</button>
+ </div>
+ <div class="membersList expand">
+  <div class="tabs">
+   <div class="contents">
+    <section id="Value-members">
+     <div data-togglable="Value members" class="tab expand">
+      <div class="member-group-header">
+       <h3 data-togglable="Value members" class="h400">Value members</h3>
+      </div>
+      <section id="Concrete-methods">
+       <div class="documentableList expand">
+        <div class="documentableList-expander">
+         <button class="icon-button show-content expand"></button>
+         <h4 class="groupHeader h200">Concrete methods</h4>
+        </div>
+        <div class="documentableElement" id="create-1e0">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="InMemoryReactionRepository.html#create-1e0" t="n" class="documentableName ">create</a>(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">reaction</span>: <a href="../domain/preprocessor/Reaction.html" t="t">Reaction</a>): <span t="t">F</span>[<span data-unresolved-link="" t="t">Either</span>[<a href="../errors/http/preprocessor/ReactionError.html" t="t">ReactionError</a>, <a href="../domain/preprocessor/Reaction.html" t="t">Reaction</a>]]
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Creates a new reaction and stores it in the repository.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Creates a new reaction and stores it in the repository.</p>
+             </div>
+             <h2 class="h200">Value parameters</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               reaction
+              </dt>
+              <dd class="body-medium">
+               <p>The <code>Reaction</code> instance to create.</p>
+              </dd>
+             </dl>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Returns
+              </dt>
+              <dd class="body-medium">
+               <p>An effect wrapping either a <code>ReactionError</code> if the creation fails or the created <code>Reaction</code> on success.</p>
+               <ul>
+                <li>If a reaction with the same name already exists, returns a <code>CreationError</code>.</li>
+               </ul>
+              </dd>
+              <dt class="body-small">
+               Source
+              </dt>
+              <dd class="body-medium">
+               <a href="https://github.com/sobakavosne/chemist-flow/blob/e756593c5459ec8010c1eaab907de35ed7eeb710/src/main/scala/core/repositories/InMemoryReactionRepository.scala#L52" target="_blank">InMemoryReactionRepository.scala</a>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement" id="delete-aba">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="InMemoryReactionRepository.html#delete-aba" t="n" class="documentableName ">delete</a>(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">id</span>: <a href="../domain/preprocessor.html#ReactionId-0" t="t">ReactionId</a>): <span t="t">F</span>[<span data-unresolved-link="" t="t">Boolean</span>]
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Deletes a reaction by its ID.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Deletes a reaction by its ID.</p>
+             </div>
+             <h2 class="h200">Value parameters</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               id
+              </dt>
+              <dd class="body-medium">
+               <p>The ID of the reaction to delete.</p>
+              </dd>
+             </dl>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Returns
+              </dt>
+              <dd class="body-medium">
+               <p>An effect wrapping a <code>Boolean</code> indicating whether the deletion was successful.</p>
+               <ul>
+                <li>Returns <code>true</code> if the reaction was successfully deleted.</li>
+                <li>Returns <code>false</code> if the reaction ID was not found.</li>
+               </ul>
+              </dd>
+              <dt class="body-small">
+               Source
+              </dt>
+              <dd class="body-medium">
+               <a href="https://github.com/sobakavosne/chemist-flow/blob/e756593c5459ec8010c1eaab907de35ed7eeb710/src/main/scala/core/repositories/InMemoryReactionRepository.scala#L74" target="_blank">InMemoryReactionRepository.scala</a>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="documentableElement" id="get-aba">
+         <div class="documentableElement-expander">
+          <button class="icon-button ar show-content"></button>
+          <div class="header monospace mono-medium">
+           <div class="signature">
+            <span class="modifiers"></span><span class="kind"><span t="k">def </span></span><a href="InMemoryReactionRepository.html#get-aba" t="n" class="documentableName ">get</a>(<span t="k"></span><span t="k"></span><span data-unresolved-link="" t="n">id</span>: <a href="../domain/preprocessor.html#ReactionId-0" t="t">ReactionId</a>): <span t="t">F</span>[<span data-unresolved-link="" t="t">Option</span>[<a href="../domain/preprocessor/Reaction.html" t="t">Reaction</a>]]
+           </div>
+          </div>
+         </div>
+         <div class="docs">
+          <span class="modifiers"></span>
+          <div>
+           <div class="originInfo"></div>
+           <div class="memberDocumentation">
+            <div class="documentableBrief doc">
+             <p>Retrieves a reaction by its ID.</p>
+            </div>
+            <div class="cover">
+             <div class="doc">
+              <p>Retrieves a reaction by its ID.</p>
+             </div>
+             <h2 class="h200">Value parameters</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               id
+              </dt>
+              <dd class="body-medium">
+               <p>The ID of the reaction to retrieve.</p>
+              </dd>
+             </dl>
+             <h2 class="h200">Attributes</h2>
+             <dl class="attributes attributes-small">
+              <dt class="body-small">
+               Returns
+              </dt>
+              <dd class="body-medium">
+               <p>An effect wrapping an optional <code>Reaction</code>. Returns <code>None</code> if the reaction is not found.</p>
+              </dd>
+              <dt class="body-small">
+               Source
+              </dt>
+              <dd class="body-medium">
+               <a href="https://github.com/sobakavosne/chemist-flow/blob/e756593c5459ec8010c1eaab907de35ed7eeb710/src/main/scala/core/repositories/InMemoryReactionRepository.scala#L40" target="_blank">InMemoryReactionRepository.scala</a>
+              </dd>
+             </dl>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+       </div>
+      </section>
+     </div>
+    </section>
+   </div>
+  </div>
+ </div>
+</section></div><div id="toc" class="body-small"><div id="toc-container"><span class="toc-title h200">In this article</span><nav class="toc-nav"><ul class="toc-list"><li><a href="#attributes">Type parameters</a></li><li><a href="#members-list">Members list</a><ul><li><a href="#Value-members">Value members</a><ul><li><a href="#Concrete-methods">Concrete methods</a></li></ul></li></ul></li></ul></nav></div></div></div><div id="footer" class="body-small mobile-footer"><div class="left-container">Generated with</div><div class="right-container"><div class="text"></div></div><div class="text-mobile"></div></div></div></div></body></html>
