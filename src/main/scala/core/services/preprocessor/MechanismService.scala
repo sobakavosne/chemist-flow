@@ -16,18 +16,55 @@ import io.circe.parser.decode
 
 import org.http4s.circe._
 
+/**
+ * Service for managing mechanisms using both a distributed cache and remote HTTP service.
+ *
+ * This service provides methods to fetch, create, and delete mechanisms. It interacts with a distributed cache for
+ * efficient data retrieval and synchronises with a remote service via HTTP for data persistence and updates.
+ *
+ * @param cacheService
+ *   The distributed cache service used for storing and retrieving mechanisms.
+ * @param client
+ *   The HTTP client for making requests to the remote mechanism service.
+ * @param baseUri
+ *   The base URI of the remote mechanism service.
+ * @tparam F
+ *   The effect type (e.g., `IO`, `SyncIO`, etc.) that supports concurrency.
+ */
 class MechanismService[F[_]: Concurrent](
   cacheService: DistributedCacheService[F],
   client:       Client[F],
   baseUri:      Uri
 ) {
 
+  /**
+   * Fetches a mechanism by its ID.
+   *
+   * This method first checks the distributed cache for the requested mechanism. If the mechanism is not found in the
+   * cache, it fetches the data from the remote mechanism service and updates the cache.
+   *
+   * @param id
+   *   The unique identifier of the mechanism to fetch.
+   * @return
+   *   An effectful computation that yields the `MechanismDetails` for the given ID.
+   */
   def getMechanism(id: MechanismId): F[MechanismDetails] =
     cacheService.getMechanismDetails(id).flatMap {
       case Some(cachedMechanism) => cachedMechanism.pure[F]
       case None                  => fetchMechanismFromRemote(id)
     }
 
+  /**
+   * Creates a new mechanism.
+   *
+   * This method sends a `POST` request to the remote mechanism service to create a new mechanism. The created mechanism
+   * is then added to the distributed cache.
+   *
+   * @param mechanism
+   *   The mechanism to create.
+   * @return
+   *   An effectful computation that yields the created `Mechanism` upon success.
+   */
   def createMechanism(mechanism: Mechanism): F[Mechanism] =
     makeRequest[Mechanism](
       Request[F](Method.POST, baseUri).withEntity(mechanism.asJson),
@@ -39,6 +76,19 @@ class MechanismService[F[_]: Concurrent](
       cacheService.putMechanism(createdMechanism.mechanismId, createdMechanism)
     )
 
+  /**
+   * Deletes a mechanism by its ID.
+   *
+   * This method sends a `DELETE` request to the remote mechanism service. If the deletion is successful, the cache is
+   * updated to remove any stale data.
+   *
+   * @param id
+   *   The unique identifier of the mechanism to delete.
+   * @return
+   *   An effectful computation that yields:
+   *   - `Right(true)` if the mechanism was successfully deleted.
+   *   - `Left(MechanismError)` if an error occurred during deletion.
+   */
   def deleteMechanism(id: MechanismId): F[Either[MechanismError, Boolean]] =
     client
       .run(Request[F](Method.DELETE, baseUri / id.toString))

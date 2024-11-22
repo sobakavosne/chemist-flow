@@ -18,26 +18,38 @@ import scala.concurrent.ExecutionContext
 import scala.concurrent.duration.FiniteDuration
 
 /**
- * Provides resources for service initialisation and lifecycle management.
+ * Provides managed resources for initialising and managing services in the application.
  *
- * This object contains methods to create managed resources for various application services, ensuring proper
- * initialisation and cleanup using the `Resource` abstraction.
+ * This object encapsulates the lifecycle management of core services like `MechanismService`, `ReactionService`,
+ * `ReaktoroService`, and various caching services. By using `Resource`, it ensures that resources are properly
+ * initialised and cleaned up.
  */
 object ServiceResources {
 
   /**
    * Creates a managed resource for the `MechanismService`.
    *
+   * The `MechanismService` interacts with caching and HTTP APIs to manage mechanisms. This method ensures that the
+   * service is initialised and cleaned up correctly, with logging for lifecycle events.
+   *
+   * Example usage:
+   * {{{
+   *   val mechanismResource = ServiceResources.mechanismServiceResource(cacheService, httpClient, baseUri)
+   *   mechanismResource.use { mechanismService =>
+   *     // Use the mechanismService
+   *   }
+   * }}}
+   *
    * @param cacheService
    *   The distributed cache service used for storing and retrieving mechanisms.
    * @param client
-   *   The HTTP client instance used to make requests to the mechanism service endpoints.
+   *   The HTTP client instance used for making API requests.
    * @param baseUri
    *   The base URI for the mechanism service's API endpoints.
    * @param logger
-   *   An implicit logger instance for logging lifecycle events and errors during the resource's creation and release.
+   *   An implicit logger instance for logging lifecycle events.
    * @return
-   *   A `Resource[IO, MechanismService[IO]]` that ensures the lifecycle of the `MechanismService` is managed correctly.
+   *   A `Resource[IO, MechanismService[IO]]` for the managed lifecycle of the `MechanismService`.
    */
   def mechanismServiceResource(
     cacheService: DistributedCacheService[IO],
@@ -56,16 +68,19 @@ object ServiceResources {
   /**
    * Creates a managed resource for the `ReactionService`.
    *
+   * The `ReactionService` handles caching and API interactions for reactions. This method manages its lifecycle,
+   * ensuring proper initialisation and cleanup with appropriate logging.
+   *
    * @param cacheService
    *   The distributed cache service used for storing and retrieving reactions.
    * @param client
-   *   The HTTP client instance used to make requests to the reaction service endpoints.
+   *   The HTTP client instance used for making API requests.
    * @param baseUri
    *   The base URI for the reaction service's API endpoints.
    * @param logger
-   *   An implicit logger instance for logging lifecycle events and errors during the resource's creation and release.
+   *   An implicit logger instance for logging lifecycle events.
    * @return
-   *   A `Resource[IO, ReactionService[IO]]` that ensures the lifecycle of the `ReactionService` is managed correctly.
+   *   A `Resource[IO, ReactionService[IO]]` for the managed lifecycle of the `ReactionService`.
    */
   def reactionServiceResource(
     cacheService: DistributedCacheService[IO],
@@ -84,16 +99,19 @@ object ServiceResources {
   /**
    * Creates a managed resource for the `ReaktoroService`.
    *
+   * The `ReaktoroService` builds on the `ReactionService` to provide extended functionality for managing reactions.
+   * This method ensures its lifecycle is properly managed, with detailed logging for creation and shutdown.
+   *
    * @param reactionService
-   *   The reaction service used to provide dependencies for the `ReaktoroService`.
+   *   The `ReactionService` used for providing dependencies to the `ReaktoroService`.
    * @param client
-   *   The HTTP client instance used to make requests to the Reaktoro service endpoints.
+   *   The HTTP client instance used for making API requests.
    * @param baseUri
    *   The base URI for the Reaktoro service's API endpoints.
    * @param logger
-   *   An implicit logger instance for logging lifecycle events and errors during the resource's creation and release.
+   *   An implicit logger instance for logging lifecycle events.
    * @return
-   *   A `Resource[IO, ReaktoroService[IO]]` that ensures the lifecycle of the `ReaktoroService` is managed correctly.
+   *   A `Resource[IO, ReaktoroService[IO]]` for the managed lifecycle of the `ReaktoroService`.
    */
   def reaktoroServiceResource(
     reactionService: ReactionService[IO],
@@ -110,12 +128,17 @@ object ServiceResources {
     )
 
   /**
-   * Creates a managed resource for the `CacheService`.
+   * Creates a managed resource for the `LocalCacheService`.
    *
+   * This method initialises a simple in-memory cache for local caching needs. The cache lifecycle is managed, and
+   * events are logged during creation and release.
+   *
+   * @param ttl
+   *   The time-to-live duration for cache entries.
    * @param logger
-   *   An implicit logger instance for logging lifecycle events and errors during the resource's creation and release.
+   *   An implicit logger instance for logging lifecycle events.
    * @return
-   *   A `Resource[IO, CacheService[IO]]` that ensures the lifecycle of the `CacheService` is managed correctly.
+   *   A `Resource[IO, LocalCacheService[IO]]` for the managed lifecycle of the `LocalCacheService`.
    */
   def localCacheServiceResource(
     implicit
@@ -132,15 +155,21 @@ object ServiceResources {
   /**
    * Creates a managed resource for the `DistributedCacheService`.
    *
+   * This method initialises a distributed cache backed by Akka Cluster. It ensures proper integration with the actor
+   * system and cluster configuration while managing the lifecycle and logging events.
+   *
    * @param system
    *   The `ActorSystem` used for Akka-based concurrency and distributed data.
    * @param selfUniqueAddress
-   *   The unique address of the current actor system instance, used for distributed data in a cluster.
+   *   The unique address of the current actor system instance, used for cluster data.
+   * @param ex
+   *   An implicit `ExecutionContext` for asynchronous operations.
+   * @param ttl
+   *   The time-to-live duration for cache entries.
    * @param logger
-   *   An implicit logger instance for logging lifecycle events and errors during the resource's creation and release.
+   *   An implicit logger instance for logging lifecycle events.
    * @return
-   *   A `Resource[IO, DistributedCacheService[IO]]` that ensures the lifecycle of the `DistributedCacheService` is
-   *   managed correctly.
+   *   A `Resource[IO, DistributedCacheService[IO]]` for the managed lifecycle of the `DistributedCacheService`.
    */
   def distributedCacheServiceResource(
     system: ActorSystem,

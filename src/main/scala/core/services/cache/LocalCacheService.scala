@@ -9,8 +9,14 @@ import core.services.cache.types.CacheServiceTrait
 /**
  * A local, in-memory service for caching mechanisms and reactions with a time-to-live (TTL) mechanism.
  *
+ * This service uses a `TrieMap` for thread-safe, concurrent caching. Each cache entry is timestamped, and expired
+ * entries are removed based on the configured TTL. The service provides CRUD operations for mechanisms and reactions,
+ * ensuring expired entries are not returned or updated.
+ *
+ * @param ttl
+ *   The time-to-live (TTL) for cache entries. Entries older than this duration are considered expired.
  * @tparam F
- *   The effect type (e.g., `IO`, `SyncIO`, etc.).
+ *   The effect type (e.g., `IO`, `SyncIO`, etc.) used to encapsulate computations.
  */
 class LocalCacheService[F[_]: Sync](
   implicit ttl: FiniteDuration
@@ -79,6 +85,15 @@ class LocalCacheService[F[_]: Sync](
     }
   }
 
+  /**
+   * Removes expired entries from all caches.
+   *
+   * This method checks the timestamp of each cache entry and removes entries that have exceeded the configured TTL.
+   * This operation is performed in-memory and is thread-safe.
+   *
+   * @return
+   *   An effectful computation that completes when all expired entries have been removed.
+   */
   def cleanExpiredEntries: F[Unit] = Sync[F].delay {
     cleanCache(mechanismCache)
     cleanCache(mechanismDetailsCache)

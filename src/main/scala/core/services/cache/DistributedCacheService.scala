@@ -18,14 +18,20 @@ import scala.concurrent.duration._
 /**
  * A distributed cache service for managing mechanisms and reactions using Akka Distributed Data.
  *
- * This service provides caching with consistency guarantees across multiple nodes in a cluster.
+ * This service provides caching with consistency guarantees across multiple nodes in a cluster. It uses `LWWMap`
+ * (Last-Write-Wins Map) for conflict resolution and performs distributed read and write operations with configurable
+ * timeouts.
  *
  * @param system
- *   The ActorSystem for Akka operations.
+ *   The ActorSystem for Akka operations, required to initialise the Distributed Data replicator.
  * @param selfUniqueAddress
  *   The unique address of the node interacting with the cache.
+ * @param ec
+ *   The ExecutionContext for handling asynchronous operations within the service.
+ * @param ttl
+ *   The Timeout for distributed operations like `Get` and `Update`.
  * @tparam F
- *   The effect type (e.g., `IO`, `Future`, etc.).
+ *   The effect type (e.g., `IO`, `Future`, etc.) used to encapsulate asynchronous computations.
  */
 class DistributedCacheService[F[_]: Async](
   system:            ActorSystem,

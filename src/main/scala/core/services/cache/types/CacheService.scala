@@ -10,8 +10,6 @@ import core.domain.preprocessor.{Mechanism, MechanismDetails, MechanismId, React
  */
 trait CacheServiceTrait[F[_]] {
 
-  // Mechanism-related methods
-
   /**
    * Retrieves a mechanism from the cache.
    *
@@ -68,8 +66,6 @@ trait CacheServiceTrait[F[_]] {
    */
   def createMechanism(id: MechanismId, mechanism: Mechanism): F[Either[String, Mechanism]]
 
-  // Reaction-related methods
-
   /**
    * Retrieves a reaction from the cache.
    *
@@ -125,8 +121,6 @@ trait CacheServiceTrait[F[_]] {
    *   An effect wrapping either an error message if the reaction exists, or the created reaction.
    */
   def createReaction(id: ReactionId, reaction: Reaction): F[Either[String, Reaction]]
-
-  // Maintenance methods
 
   /**
    * Cleans expired entries from the cache.

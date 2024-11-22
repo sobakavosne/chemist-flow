@@ -176,6 +176,12 @@ sealed trait ConfigLoader {
   def engineHttpClientConfig: ChemistEngineHttpClient
 }
 
+/**
+ * Provides a loader for application configuration.
+ *
+ * The configuration is loaded from `application.conf` and `reference.conf` files, with the former taking precedence.
+ * This object also sets up logging configurations.
+ */
 object ConfigLoader {
   System.setProperty("logback.configurationFile", "src/main/scala/resource/logback.xml")
 
@@ -203,6 +209,12 @@ object ConfigLoader {
 
 }
 
+/**
+ * Provides a loader for test configuration.
+ *
+ * The configuration is loaded from `application.spec.conf` and `reference.conf` files, with the former taking
+ * precedence. This loader is used specifically for test environments.
+ */
 object TestConfigLoader {
   System.setProperty("logback.configurationFile", "src/main/scala/resource/logback.xml")
 
@@ -225,7 +237,7 @@ object TestConfigLoader {
     override val preprocessorHttpClientConfig: ChemistPreprocessorHttpClient = appConfig.preprocessorHttpClient
     override val engineHttpClientConfig: ChemistEngineHttpClient             = appConfig.engineHttpClient
 
-    val pureConfig = config
+    val pureConfig: Config = config
   }
 
 }
