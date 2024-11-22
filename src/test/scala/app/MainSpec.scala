@@ -32,8 +32,13 @@ import scala.concurrent.duration.DurationInt
 
 class MainSpec extends AsyncWordSpec with Matchers with BeforeAndAfterAll {
 
-  implicit val logger: Logger[IO]                   = Slf4jLogger.getLogger[IO]
-  implicit val system: ActorSystem                  = ActorSystem("TestChemistFlowActorSystem", DefaultConfigLoader.pureConfig)
+  implicit val logger: Logger[IO] = Slf4jLogger.getLogger[IO]
+
+  implicit val system: ActorSystem = ActorSystem(
+    "TestChemistFlowActorSystem",
+    DefaultConfigLoader.pureConfig
+  )
+
   implicit val selfUniqueAddress: SelfUniqueAddress = DistributedData(system).selfUniqueAddress
   implicit val ttlDistributed: Timeout              = Timeout(1.seconds)
 
