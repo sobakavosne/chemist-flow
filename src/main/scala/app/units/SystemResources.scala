@@ -9,22 +9,40 @@ import org.typelevel.log4cats.Logger
 import scala.concurrent.ExecutionContext
 
 /**
- * Provides resources for managing system-level components, such as the `ActorSystem`.
+ * Provides managed resources for system-level components.
+ *
+ * This object encapsulates the lifecycle management of system-level components like the `ActorSystem`, ensuring proper
+ * initialisation and termination using the `Resource` abstraction.
  */
 object SystemResources {
 
   /**
    * Creates a managed resource for the `ActorSystem`.
    *
+   * This method manages the lifecycle of an `ActorSystem` instance, ensuring it is properly initialised and terminated.
+   * Lifecycle events, including creation and termination, are logged for observability. Any errors during termination
+   * are captured and logged.
+   *
+   * Example usage:
+   * {{{
+   *   implicit val system: ActorSystem = ActorSystem("my-system")
+   *   implicit val logger: Logger[IO] = Slf4jLogger.getLogger[IO]
+   *   implicit val ec: ExecutionContext = system.dispatcher
+   *
+   *   val systemResource = SystemResources.actorSystemResource
+   *   systemResource.use { actorSystem =>
+   *     // Use the actor system
+   *   }
+   * }}}
+   *
    * @param ec
    *   The `ExecutionContext` to be used by the `ActorSystem`.
    * @param system
    *   The `ActorSystem` instance to be managed.
    * @param logger
-   *   An implicit logger instance for logging lifecycle events and errors during the resource's creation and release.
+   *   An implicit logger instance for logging lifecycle events.
    * @return
-   *   A `Resource[IO, ActorSystem]` that manages the lifecycle of the `ActorSystem` instance, ensuring proper
-   *   termination.
+   *   A `Resource[IO, ActorSystem]` that ensures proper initialisation and termination of the `ActorSystem`.
    */
   def actorSystemResource(
     implicit

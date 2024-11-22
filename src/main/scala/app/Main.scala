@@ -28,30 +28,48 @@ import app.units.ServiceResources.{
 }
 
 /**
- * Entry point for the application. Responsible for configuring and starting all resources and services.
+ * Main entry point for the application.
+ *
+ * This object configures and starts all required resources and services for the application, including:
+ *   - Actor system setup for Akka-based concurrency.
+ *   - HTTP client setup for external API interactions.
+ *   - Distributed cache management with a configurable time-to-live (TTL).
+ *   - Initialisation of core services (`MechanismService`, `ReactionService`, `ReaktoroService`).
+ *   - HTTP server setup for serving API endpoints.
+ *
+ * Proper lifecycle management is ensured using `cats.effect.Resource`, which guarantees that all resources are
+ * initialised and cleaned up correctly. This entry point waits for user input to terminate the application, ensuring a
+ * controlled shutdown.
  */
 object Main extends IOApp {
 
   /**
    * Configures and manages the lifecycle of all resources and services required for the application.
    *
-   * This method initialises resources such as the actor system, HTTP clients, distributed cache, services, and server.
-   * It ensures proper resource management by leveraging `Resource` for initialisation and cleanup.
+   * This method integrates the initialisation and cleanup of:
+   *   - Actor system for concurrency and distributed data.
+   *   - HTTP clients for API communication.
+   *   - Distributed cache services with a configurable time-to-live (TTL) for cache expiration.
+   *   - Core application services (`MechanismService`, `ReactionService`, `ReaktoroService`).
+   *   - HTTP server for hosting API endpoints. API routes are combined and served as a single HTTP application.
+   *
+   * The method waits for user input to terminate the application, ensuring a controlled shutdown. All resources are
+   * composed using `cats.effect.Resource`, ensuring proper cleanup on termination.
    *
    * @param config
-   *   The configuration loader that provides application-specific settings, such as HTTP endpoints, client
-   *   configurations, and server properties.
+   *   The configuration loader for application-specific settings.
    * @param ec
-   *   The `ExecutionContext` used to handle asynchronous operations across the application.
+   *   The `ExecutionContext` for handling asynchronous operations.
    * @param system
-   *   The `ActorSystem` used for Akka-based concurrency and distributed data.
+   *   The Akka `ActorSystem` for managing concurrency.
    * @param selfUniqueAddress
-   *   The unique address of the current actor system, used for distributed data in a cluster.
+   *   The unique address of the current actor system, used for distributed data.
+   * @param ttl
+   *   A timeout representing the time-to-live (TTL) for cache expiration.
    * @param logger
-   *   An implicit logger instance for recording lifecycle events, debugging, and error handling.
+   *   An implicit logger instance for lifecycle logging.
    * @return
-   *   A `Resource[IO, Unit]` that encapsulates the application's full lifecycle. This includes initialisation, running
-   *   the server, and ensuring all resources are properly cleaned up when the application terminates.
+   *   A `Resource[IO, Unit]` that encapsulates the entire lifecycle of the application.
    */
   private def runApp(
     config: ConfigLoader
@@ -60,7 +78,7 @@ object Main extends IOApp {
     ec: ExecutionContext,
     system: ActorSystem,
     selfUniqueAddress: SelfUniqueAddress,
-    cacheExpiration: Timeout,
+    ttl: Timeout,
     logger: Logger[IO]
   ): Resource[IO, Unit] =
     val preprocessorBaseUri = config.preprocessorHttpClientConfig.baseUri
@@ -85,6 +103,12 @@ object Main extends IOApp {
 
   /**
    * Main entry point for the application.
+   *
+   * This method sets up the application by:
+   *   - Initialising implicit dependencies, including the logger, actor system, execution context, distributed data,
+   *     unique address, and cache expiration timeout (TTL).
+   *   - Loading configuration using the `DefaultConfigLoader`.
+   *   - Running the application using `runApp` and ensuring all resources are cleaned up on exit.
    *
    * @param args
    *   The command-line arguments passed to the application.

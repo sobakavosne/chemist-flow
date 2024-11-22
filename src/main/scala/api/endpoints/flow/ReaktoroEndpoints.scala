@@ -33,23 +33,37 @@ object ComputePropsRequest {
 /**
  * Defines the HTTP routes for interacting with the ReaktoroService.
  *
+ * This class sets up the routing for the API endpoints that allow clients to compute system properties for chemical
+ * reactions. It integrates with the `ReaktoroService` to perform the computations and handle requests.
+ *
  * @param reaktoroService
- *   The service handling system property computations.
+ *   The service handling system property computations. This should implement the core logic to process reaction
+ *   properties using the provided inputs.
  */
+
 class ReaktoroEndpoints(
   reaktoroService: ReaktoroService[IO]
 ) {
 
   /**
-   * HTTP POST route for computing system properties for a reaction.
+   * HTTP POST route for computing system properties for a chemical reaction.
    *
    * Endpoint: `/api/system/properties`
    *
-   * @param req
-   *   The HTTP request containing a `ComputePropsRequest` object in the body.
+   * This endpoint accepts a JSON payload containing a `ComputePropsRequest` object, which includes:
+   *   - `reactionId`: The identifier of the reaction.
+   *   - `database`: The database to use for the computation.
+   *   - `amounts`: The list of molecule amounts relevant to the computation.
+   *
+   * The route invokes the `ReaktoroService` to compute the system properties for the given reaction and returns the
+   * results as a JSON response. If an error occurs during processing, an appropriate error response is sent.
+   *
    * @return
-   *   A JSON response containing the computed system properties or an error message.
+   *   An HTTP response:
+   *   - `200 OK`: With a JSON body containing the computed system properties.
+   *   - `500 Internal Server Error`: If the service fails to process the request.
    */
+
   private val computeSystemPropsForReactionRoute: HttpRoutes[IO] = HttpRoutes.of[IO] {
     case req @ POST -> Root / "system" / "properties" =>
       req.as[ComputePropsRequest].flatMap {
