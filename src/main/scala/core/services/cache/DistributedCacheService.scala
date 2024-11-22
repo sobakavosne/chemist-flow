@@ -3,11 +3,14 @@ package core.services.cache
 import akka.actor.ActorSystem
 import akka.cluster.ddata.Replicator.{Get, ReadAll, Update, WriteAll}
 import akka.cluster.ddata.{DistributedData, LWWMap, LWWMapKey, Replicator, SelfUniqueAddress}
-import akka.util.Timeout
 import akka.pattern.ask
+import akka.util.Timeout
 
 import cats.effect.Async
+import cats.implicits.{toFlatMapOps, toFunctorOps}
+
 import core.domain.preprocessor.{Mechanism, MechanismDetails, MechanismId, Reaction, ReactionDetails, ReactionId}
+import core.services.cache.types.CacheServiceTrait
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
@@ -27,121 +30,55 @@ import scala.concurrent.duration._
 class DistributedCacheService[F[_]: Async](
   system:            ActorSystem,
   selfUniqueAddress: SelfUniqueAddress
-) {
+)(
+  implicit
+  ec:                ExecutionContext,
+  ttl:               Timeout
+) extends CacheServiceTrait[F] {
 
-  implicit private val timeout: Timeout     = Timeout(5.seconds)
-  implicit private val ec: ExecutionContext = system.dispatcher
-
-  private val replicator = DistributedData(system).replicator
-
+  private val replicator               = DistributedData(system).replicator
   private val mechanismCacheKey        = LWWMapKey[MechanismId, Mechanism]("mechanismCache")
   private val mechanismDetailsCacheKey = LWWMapKey[MechanismId, MechanismDetails]("mechanismDetailsCache")
   private val reactionCacheKey         = LWWMapKey[ReactionId, Reaction]("reactionCache")
   private val reactionDetailsCacheKey  = LWWMapKey[ReactionId, ReactionDetails]("reactionDetailsCache")
 
-  /**
-   * Retrieves a mechanism from the distributed cache.
-   *
-   * @param id
-   *   The ID of the mechanism.
-   * @return
-   *   An effect wrapping an optional `Mechanism`.
-   */
-  def getMechanism(id: MechanismId): F[Option[Mechanism]] =
+  override def getMechanism(id: MechanismId): F[Option[Mechanism]] =
     getFromCache(mechanismCacheKey, id)
 
-  /**
-   * Retrieves a mechanism's details from the distributed cache.
-   *
-   * @param id
-   *   The ID of the mechanism.
-   * @return
-   *   An effect wrapping an optional `MechanismDetails`.
-   */
-  def getMechanismDetails(id: MechanismId): F[Option[MechanismDetails]] =
+  override def getMechanismDetails(id: MechanismId): F[Option[MechanismDetails]] =
     getFromCache(mechanismDetailsCacheKey, id)
 
-  /**
-   * Caches a mechanism by its ID.
-   *
-   * @param id
-   *   The ID of the mechanism.
-   * @param mechanism
-   *   The `Mechanism` instance to cache.
-   * @return
-   *   An effect indicating completion.
-   */
-  def putMechanism(id: MechanismId, mechanism: Mechanism): F[Unit] =
+  override def putMechanism(id: MechanismId, mechanism: Mechanism): F[Unit] =
     putInCache(mechanismCacheKey, id, mechanism)
 
-  /**
-   * Caches a mechanism's details by its ID.
-   *
-   * @param id
-   *   The ID of the mechanism.
-   * @param mechanismDetails
-   *   The `MechanismDetails` instance to cache.
-   * @return
-   *   An effect indicating completion.
-   */
-  def putMechanismDetails(id: MechanismId, mechanismDetails: MechanismDetails): F[Unit] =
+  override def putMechanismDetails(id: MechanismId, mechanismDetails: MechanismDetails): F[Unit] =
     putInCache(mechanismDetailsCacheKey, id, mechanismDetails)
 
-  /**
-   * Retrieves a reaction from the distributed cache.
-   *
-   * @param id
-   *   The ID of the reaction.
-   * @return
-   *   An effect wrapping an optional `ReactionDetails`.
-   */
-  def getReaction(id: ReactionId): F[Option[Reaction]] =
+  override def createMechanism(id: MechanismId, mechanism: Mechanism): F[Either[String, Mechanism]] =
+    getMechanism(id).flatMap {
+      case Some(_) => Async[F].pure(Left(s"Mechanism with ID $id already exists in cache."))
+      case None    => putMechanism(id, mechanism).map(_ => Right(mechanism))
+    }
+
+  override def getReaction(id: ReactionId): F[Option[Reaction]] =
     getFromCache(reactionCacheKey, id)
 
-  /**
-   * Retrieves a reaction's details from the distributed cache.
-   *
-   * @param id
-   *   The ID of the reaction.
-   * @return
-   *   An effect wrapping an optional `ReactionDetails`.
-   */
-  def getReactionDetails(id: ReactionId): F[Option[ReactionDetails]] =
+  override def getReactionDetails(id: ReactionId): F[Option[ReactionDetails]] =
     getFromCache(reactionDetailsCacheKey, id)
 
-  /**
-   * Caches a reaction by its ID.
-   *
-   * @param id
-   *   The ID of the reaction.
-   * @param reaction
-   *   The `Reaction` instance to cache.
-   * @return
-   *   An effect indicating completion.
-   */
-  def putReaction(id: ReactionId, reaction: Reaction): F[Unit] =
+  override def putReaction(id: ReactionId, reaction: Reaction): F[Unit] =
     putInCache(reactionCacheKey, id, reaction)
 
-  /**
-   * Caches a reaction's details by its ID.
-   *
-   * @param id
-   *   The ID of the reaction.
-   * @param reactionDetails
-   *   The `ReactionDetails` instance to cache.
-   * @return
-   *   An effect indicating completion.
-   */
-  def putReactionDetails(id: ReactionId, reactionDetails: ReactionDetails): F[Unit] =
+  override def putReactionDetails(id: ReactionId, reactionDetails: ReactionDetails): F[Unit] =
     putInCache(reactionDetailsCacheKey, id, reactionDetails)
 
-  /**
-   * Cleans expired entries from the distributed cache (not applicable in a distributed system).
-   *
-   * @return
-   *   An effect indicating completion.
-   */
-  def cleanExpiredEntries: F[Unit] = Async[F].unit
+  override def createReaction(id: ReactionId, reaction: Reaction): F[Either[String, Reaction]] =
+    getReaction(id).flatMap {
+      case Some(_) => Async[F].pure(Left(s"Reaction with ID $id already exists in cache."))
+      case None    => putReaction(id, reaction).map(_ => Right(reaction))
+    }
+
+  override def cleanExpiredEntries: F[Unit] = Async[F].unit // Not applicable in distributed systems
 
   private def getFromCache[K, V](key: LWWMapKey[K, V], id: K): F[Option[V]] =
     Async[F].fromFuture {

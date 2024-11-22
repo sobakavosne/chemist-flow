@@ -202,3 +202,30 @@ object ConfigLoader {
   }
 
 }
+
+object TestConfigLoader {
+  System.setProperty("logback.configurationFile", "src/main/scala/resource/logback.xml")
+
+  private val refConf: Config =
+    ConfigFactory.parseFile(new File("src/main/scala/resource/reference.conf"))
+
+  private val appConf: Config =
+    ConfigFactory.parseFile(new File("src/test/scala/resource/application.spec.conf"))
+
+  private val config: Config =
+    appConf.withFallback(refConf).resolve()
+
+  private lazy val loadedAppConfig: AppConfig = ConfigSource.fromConfig(config).loadOrThrow[AppConfig]
+
+  case object DefaultConfigLoader extends ConfigLoader {
+    override val appConfig: AppConfig                                        = loadedAppConfig
+    override val kafkaConfig: KafkaConfig                                    = appConfig.kafka
+    override val httpConfig: HttpConfig                                      = appConfig.http
+    override val databaseConfig: DatabaseConfig                              = appConfig.database
+    override val preprocessorHttpClientConfig: ChemistPreprocessorHttpClient = appConfig.preprocessorHttpClient
+    override val engineHttpClientConfig: ChemistEngineHttpClient             = appConfig.engineHttpClient
+
+    val pureConfig = config
+  }
+
+}

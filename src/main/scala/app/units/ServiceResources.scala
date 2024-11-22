@@ -2,17 +2,20 @@ package app.units
 
 import akka.actor.ActorSystem
 import akka.cluster.ddata.SelfUniqueAddress
+import akka.util.Timeout
 
 import cats.effect.{IO, Resource}
 
-import core.services.cache.CacheService
-import core.services.cache.DistributedCacheService
+import core.services.cache.{DistributedCacheService, LocalCacheService}
 import core.services.preprocessor.{MechanismService, ReactionService}
 import core.services.flow.ReaktoroService
 
 import org.http4s.client.Client
 import org.http4s.Uri
 import org.typelevel.log4cats.Logger
+
+import scala.concurrent.ExecutionContext
+import scala.concurrent.duration.FiniteDuration
 
 /**
  * Provides resources for service initialisation and lifecycle management.
@@ -114,14 +117,16 @@ object ServiceResources {
    * @return
    *   A `Resource[IO, CacheService[IO]]` that ensures the lifecycle of the `CacheService` is managed correctly.
    */
-  def cacheServiceResource(
-    implicit logger: Logger[IO]
-  ): Resource[IO, CacheService[IO]] =
+  def localCacheServiceResource(
+    implicit
+    ttl: FiniteDuration,
+    logger: Logger[IO]
+  ): Resource[IO, LocalCacheService[IO]] =
     Resource.make(
-      logger.info("Creating Cache Service") *>
-        IO(new CacheService[IO])
+      logger.info("Creating Local Cache Service") *>
+        IO(new LocalCacheService[IO])
     )(_ =>
-      logger.info("Shutting down Cache Service").handleErrorWith(_ => IO.unit)
+      logger.info("Shutting down Local Cache Service").handleErrorWith(_ => IO.unit)
     )
 
   /**
@@ -141,7 +146,10 @@ object ServiceResources {
     system: ActorSystem,
     selfUniqueAddress: SelfUniqueAddress
   )(
-    implicit logger: Logger[IO]
+    implicit
+    ex: ExecutionContext,
+    ttl: Timeout,
+    logger: Logger[IO]
   ): Resource[IO, DistributedCacheService[IO]] =
     Resource.make(
       logger.info("Creating Distributed Cache Service") *>

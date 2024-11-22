@@ -2,6 +2,7 @@ package app
 
 import akka.actor.ActorSystem
 import akka.cluster.ddata.{DistributedData, SelfUniqueAddress}
+import akka.util.Timeout
 
 import api.endpoints.preprocessor.PreprocessorEndpoints
 import api.ServerBuilder
@@ -12,7 +13,7 @@ import cats.implicits.toSemigroupKOps
 
 import com.comcast.ip4s.{Host, Port}
 
-import config.ConfigLoader.DefaultConfigLoader
+import config.TestConfigLoader.DefaultConfigLoader
 
 import core.services.cache.DistributedCacheService
 import core.services.flow.ReaktoroService
@@ -25,15 +26,16 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AsyncWordSpec
 import org.typelevel.log4cats.slf4j.Slf4jLogger
 import org.typelevel.log4cats.Logger
-import scala.concurrent.Future
-import scala.concurrent.Await
+
+import scala.concurrent.{Await, Future}
 import scala.concurrent.duration.DurationInt
 
 class MainSpec extends AsyncWordSpec with Matchers with BeforeAndAfterAll {
 
   implicit val logger: Logger[IO]                   = Slf4jLogger.getLogger[IO]
-  implicit val system: ActorSystem                  = ActorSystem("TestSystem", DefaultConfigLoader.pureConfig)
+  implicit val system: ActorSystem                  = ActorSystem("TestChemistFlowActorSystem", DefaultConfigLoader.pureConfig)
   implicit val selfUniqueAddress: SelfUniqueAddress = DistributedData(system).selfUniqueAddress
+  implicit val ttlDistributed: Timeout              = Timeout(1.seconds)
 
   override def afterAll(): Unit = {
     system.terminate()

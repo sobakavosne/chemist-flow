@@ -2,6 +2,7 @@ package app
 
 import akka.actor.ActorSystem
 import akka.cluster.ddata.{DistributedData, SelfUniqueAddress}
+import akka.util.Timeout
 
 import cats.effect.{ExitCode, IO, IOApp, Resource}
 import cats.implicits.toSemigroupKOps
@@ -13,6 +14,7 @@ import org.typelevel.log4cats.slf4j.Slf4jLogger
 import org.typelevel.log4cats.Logger
 
 import scala.concurrent.ExecutionContext
+import scala.concurrent.duration.DurationInt
 
 import app.units.SystemResources.actorSystemResource
 import app.units.ClientResources.clientResource
@@ -58,6 +60,7 @@ object Main extends IOApp {
     ec: ExecutionContext,
     system: ActorSystem,
     selfUniqueAddress: SelfUniqueAddress,
+    cacheExpiration: Timeout,
     logger: Logger[IO]
   ): Resource[IO, Unit] =
     val preprocessorBaseUri = config.preprocessorHttpClientConfig.baseUri
@@ -98,6 +101,7 @@ object Main extends IOApp {
     implicit val ec: ExecutionContext                 = system.dispatcher
     implicit val distributedData                      = DistributedData(system)
     implicit val selfUniqueAddress: SelfUniqueAddress = distributedData.selfUniqueAddress
+    implicit val cacheExpiration: Timeout             = Timeout(5.minutes)
 
     runApp(config)
       .use(_ => IO.unit)
