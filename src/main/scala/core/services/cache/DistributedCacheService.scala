@@ -13,7 +13,6 @@ import core.domain.preprocessor.{Mechanism, MechanismDetails, MechanismId, React
 import core.services.cache.types.CacheServiceTrait
 
 import scala.concurrent.ExecutionContext
-import scala.concurrent.duration._
 
 /**
  * A distributed cache service for managing mechanisms and reactions using Akka Distributed Data.
@@ -89,7 +88,7 @@ class DistributedCacheService[F[_]: Async](
   private def getFromCache[K, V](key: LWWMapKey[K, V], id: K): F[Option[V]] =
     Async[F].fromFuture {
       Async[F].delay {
-        (replicator ? Get(key, ReadAll(5.seconds))).map {
+        (replicator ? Get(key, ReadAll(ttl.duration))).map {
           case response: Replicator.GetSuccess[LWWMap[K, V]] @unchecked =>
             response.dataValue.get(id)
           case _: Replicator.NotFound[V] @unchecked                     =>
@@ -104,9 +103,9 @@ class DistributedCacheService[F[_]: Async](
   private def putInCache[K, V](key: LWWMapKey[K, V], id: K, value: V): F[Unit] =
     Async[F].fromFuture {
       Async[F].delay {
-        (replicator ? Update(key, LWWMap.empty[K, V], WriteAll(5.seconds)) {
+        (replicator ? Update(key, LWWMap.empty[K, V], WriteAll(ttl.duration)) {
           _.put(selfUniqueAddress, id, value)
-        }).map(_ => ())
+        }).void
       }
     }
 

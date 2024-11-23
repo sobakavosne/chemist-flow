@@ -8,13 +8,12 @@ import core.errors.http.preprocessor.MechanismError
 import core.errors.http.preprocessor.MechanismError._
 import core.services.cache.DistributedCacheService
 
+import org.http4s.circe._
 import org.http4s.client.Client
 import org.http4s.{Method, Request, Status, Uri}
 
 import io.circe.syntax._
 import io.circe.parser.decode
-
-import org.http4s.circe._
 
 /**
  * Service for managing mechanisms using both a distributed cache and remote HTTP service.

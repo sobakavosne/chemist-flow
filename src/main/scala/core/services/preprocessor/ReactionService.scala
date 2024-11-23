@@ -1,16 +1,19 @@
 package core.services.preprocessor
 
 import cats.effect.Concurrent
-import cats.implicits._
+import cats.implicits.{catsSyntaxApplicativeError, catsSyntaxApplicativeId, toBifunctorOps, toFlatMapOps, toFunctorOps}
+
 import core.domain.preprocessor.{Reaction, ReactionDetails, ReactionId}
 import core.errors.http.preprocessor.ReactionError
 import core.errors.http.preprocessor.ReactionError._
 import core.services.cache.DistributedCacheService
+
+import org.http4s.circe._
 import org.http4s.client.Client
 import org.http4s.{Method, Request, Status, Uri}
+
 import io.circe.syntax._
 import io.circe.parser.decode
-import org.http4s.circe._
 
 /**
  * Service for managing reactions using both a distributed cache and remote HTTP service.

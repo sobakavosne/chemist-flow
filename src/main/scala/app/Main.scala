@@ -7,9 +7,13 @@ import akka.util.Timeout
 import cats.effect.{ExitCode, IO, IOApp, Resource}
 import cats.implicits.toSemigroupKOps
 
+import com.comcast.ip4s.Host
+import com.comcast.ip4s.Port
+
 import config.ConfigLoader
 import config.ConfigLoader.DefaultConfigLoader
 
+import org.http4s.Uri
 import org.typelevel.log4cats.slf4j.Slf4jLogger
 import org.typelevel.log4cats.Logger
 
@@ -81,10 +85,10 @@ object Main extends IOApp {
     ttl: Timeout,
     logger: Logger[IO]
   ): Resource[IO, Unit] =
-    val preprocessorBaseUri = config.preprocessorHttpClientConfig.baseUri
-    val engineBaseUri       = config.engineHttpClientConfig.baseUri
-    val host                = config.httpConfig.host
-    val port                = config.httpConfig.port
+    val preprocessorBaseUri: Uri = config.preprocessorHttpClientConfig.baseUri
+    val engineBaseUri: Uri       = config.engineHttpClientConfig.baseUri
+    val host: Host               = config.httpConfig.host
+    val port: Port               = config.httpConfig.port
 
     for {
       system                <- actorSystemResource
@@ -125,7 +129,7 @@ object Main extends IOApp {
     implicit val ec: ExecutionContext                 = system.dispatcher
     implicit val distributedData                      = DistributedData(system)
     implicit val selfUniqueAddress: SelfUniqueAddress = distributedData.selfUniqueAddress
-    implicit val cacheExpiration: Timeout             = Timeout(5.minutes)
+    implicit val ttl: Timeout                         = Timeout(5.minutes)
 
     runApp(config)
       .use(_ => IO.unit)
