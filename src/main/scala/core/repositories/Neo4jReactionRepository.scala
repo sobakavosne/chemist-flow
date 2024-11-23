@@ -2,13 +2,18 @@ package core.repositories
 
 import cats.effect.Sync
 import cats.implicits.{toFlatMapOps, toFunctorOps}
+
 import core.domain.preprocessor.{Reaction, ReactionId}
 import core.errors.http.preprocessor.ReactionError
 import core.errors.http.preprocessor.ReactionError.CreationError
+
 import io.circe.parser.decode
 import io.circe.syntax.EncoderOps
+
 import infrastructure.http.HttpClient
+
 import org.http4s.Uri
+
 import types.ReactionRepository
 
 /**

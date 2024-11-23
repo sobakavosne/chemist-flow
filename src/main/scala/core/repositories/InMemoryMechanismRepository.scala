@@ -1,10 +1,12 @@
 package core.repositories
 
 import cats.effect.{Ref, Sync}
+import cats.implicits.{catsSyntaxApplicativeId, catsSyntaxEitherId, catsSyntaxEq, toFlatMapOps, toFunctorOps}
+
 import core.domain.preprocessor.{Mechanism, MechanismId}
 import core.errors.http.preprocessor.MechanismError
 import core.errors.http.preprocessor.MechanismError.CreationError
-import cats.implicits.toFunctorOps
+
 import types.MechanismRepository
 
 /**
@@ -70,19 +72,20 @@ class InMemoryMechanismRepository[F[_]: Sync](state: Ref[F, Map[MechanismId, Mec
    *   - The `copy` method in Scala can be thought of as `record syntax` in Haskell, creating a new `Mechanism` with an
    *     updated `id`.
    */
-  def create(mechanism: Mechanism): F[Either[MechanismError, Mechanism]] = {
-    state.modify { mechanisms =>
-      val id = generateId(mechanisms)
-
-      if (mechanisms.values.exists(_.mechanismName == mechanism.mechanismName)) {
-        // Returns Left if a mechanism with the same name already exists
-        (mechanisms, Left(CreationError(s"Mechanism with name '${mechanism.mechanismName}' already exists")))
-      } else {
-        val newMechanism = mechanism.copy(id)
-        (mechanisms + (id -> newMechanism), Right(newMechanism))
-      }
+  def create(mechanism: Mechanism): F[Either[MechanismError, Mechanism]] =
+    state.get.flatMap { mechanisms =>
+      mechanisms.values
+        .find(_.mechanismName === mechanism.mechanismName)
+        .fold {
+          val newId        = generateId(mechanisms)
+          val newMechanism = mechanism.copy(newId)
+          state.update(_ + (newId -> newMechanism)).as(newMechanism.asRight[MechanismError])
+        } { _ =>
+          CreationError(s"Mechanism with name '${mechanism.mechanismName}' already exists")
+            .asLeft[Mechanism]
+            .pure[F]
+        }
     }
-  }
 
   /**
    * Deletes a Mechanism from the state by its identifier.
@@ -96,8 +99,8 @@ class InMemoryMechanismRepository[F[_]: Sync](state: Ref[F, Map[MechanismId, Mec
    */
   def delete(id: MechanismId): F[Boolean] =
     state.modify { mechanisms =>
-      if (mechanisms.contains(id)) (mechanisms - id, true)
-      else (mechanisms, false)
+      mechanisms.get(id)
+        .fold((mechanisms, false))(_ => (mechanisms - id, true))
     }
 
 }

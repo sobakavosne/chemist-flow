@@ -1,10 +1,13 @@
 package core.services.cache
 
-import scala.concurrent.duration._
-import core.domain.preprocessor.{Mechanism, MechanismDetails, MechanismId, Reaction, ReactionDetails, ReactionId}
-import scala.collection.concurrent.TrieMap
 import cats.effect.Sync
+import cats.implicits.{toFlatMapOps, toFunctorOps}
+
+import core.domain.preprocessor.{Mechanism, MechanismDetails, MechanismId, Reaction, ReactionDetails, ReactionId}
 import core.services.cache.types.CacheServiceTrait
+
+import scala.collection.concurrent.TrieMap
+import scala.concurrent.duration._
 
 /**
  * A local, in-memory service for caching mechanisms and reactions with a time-to-live (TTL) mechanism.
@@ -32,8 +35,8 @@ class LocalCacheService[F[_]: Sync](
   private def isExpired(entryTime: Long): Boolean =
     currentTime - entryTime > ttl.toMillis
 
-  private def cleanCache[K, V](cache: TrieMap[K, (V, Long)]): Unit =
-    cache.filterInPlace { case (_, (_, timestamp)) => !isExpired(timestamp) }
+  private def cleanCache[K, V](cache: TrieMap[K, (V, Long)]): F[Unit] =
+    Sync[F].delay { cache.filterInPlace { case (_, (_, timestamp)) => !isExpired(timestamp) } }
 
   private def getFromCache[K, V](cache: TrieMap[K, (V, Long)], id: K): F[Option[V]] =
     Sync[F].delay {
@@ -94,11 +97,13 @@ class LocalCacheService[F[_]: Sync](
    * @return
    *   An effectful computation that completes when all expired entries have been removed.
    */
-  def cleanExpiredEntries: F[Unit] = Sync[F].delay {
-    cleanCache(mechanismCache)
-    cleanCache(mechanismDetailsCache)
-    cleanCache(reactionCache)
-    cleanCache(reactionDetailsCache)
+  def cleanExpiredEntries: F[Unit] = {
+    for {
+      _ <- cleanCache(mechanismCache)
+      _ <- cleanCache(mechanismDetailsCache)
+      _ <- cleanCache(reactionCache)
+      _ <- cleanCache(reactionDetailsCache)
+    } yield ()
   }
 
 }
