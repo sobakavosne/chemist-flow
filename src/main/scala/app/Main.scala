@@ -4,6 +4,17 @@ import akka.actor.ActorSystem
 import akka.cluster.ddata.{DistributedData, SelfUniqueAddress}
 import akka.util.Timeout
 
+import app.units.SystemResources.actorSystemResource
+import app.units.ClientResources.clientResource
+import app.units.EndpointResources.{preprocessorEndpointsResource, reaktoroEndpointsResource}
+import app.units.ServerResources.serverBuilderResource
+import app.units.ServiceResources.{
+  distributedCacheServiceResource,
+  mechanismServiceResource,
+  reactionServiceResource,
+  reaktoroServiceResource
+}
+
 import cats.effect.{ExitCode, IO, IOApp, Resource}
 import cats.implicits.toSemigroupKOps
 
@@ -20,16 +31,7 @@ import org.typelevel.log4cats.Logger
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration.DurationInt
 
-import app.units.SystemResources.actorSystemResource
-import app.units.ClientResources.clientResource
-import app.units.EndpointResources.{preprocessorEndpointsResource, reaktoroEndpointsResource}
-import app.units.ServerResources.serverBuilderResource
-import app.units.ServiceResources.{
-  distributedCacheServiceResource,
-  mechanismServiceResource,
-  reactionServiceResource,
-  reaktoroServiceResource
-}
+import java.util.concurrent.TimeUnit
 
 /**
  * Main entry point for the application.
@@ -37,7 +39,7 @@ import app.units.ServiceResources.{
  * This object configures and starts all required resources and services for the application, including:
  *   - Actor system setup for Akka-based concurrency.
  *   - HTTP client setup for external API interactions.
- *   - Distributed cache management with a configurable time-to-live (TTL).
+ *   - Distributed cache management with separate time-to-live (TTL) settings for local and distributed caches.
  *   - Initialisation of core services (`MechanismService`, `ReactionService`, `ReaktoroService`).
  *   - HTTP server setup for serving API endpoints.
  *
@@ -53,7 +55,7 @@ object Main extends IOApp {
    * This method integrates the initialisation and cleanup of:
    *   - Actor system for concurrency and distributed data.
    *   - HTTP clients for API communication.
-   *   - Distributed cache services with a configurable time-to-live (TTL) for cache expiration.
+   *   - Distributed cache services with separate time-to-live (TTL) configurations for local and distributed caches.
    *   - Core application services (`MechanismService`, `ReactionService`, `ReaktoroService`).
    *   - HTTP server for hosting API endpoints. API routes are combined and served as a single HTTP application.
    *
@@ -68,8 +70,10 @@ object Main extends IOApp {
    *   The Akka `ActorSystem` for managing concurrency.
    * @param selfUniqueAddress
    *   The unique address of the current actor system, used for distributed data.
-   * @param ttl
-   *   A timeout representing the time-to-live (TTL) for cache expiration.
+   * @param distributedTtl
+   *   A timeout representing the time-to-live (TTL) for distributed cache expiration.
+   * @param localTtlWithUnit
+   *   A tuple containing the time-to-live (TTL) for the local cache and its time unit.
    * @param logger
    *   An implicit logger instance for lifecycle logging.
    * @return
@@ -82,7 +86,8 @@ object Main extends IOApp {
     ec: ExecutionContext,
     system: ActorSystem,
     selfUniqueAddress: SelfUniqueAddress,
-    ttl: Timeout,
+    distributedTtl: Timeout,
+    localTtlWithUnit: Tuple2[Int, TimeUnit],
     logger: Logger[IO]
   ): Resource[IO, Unit] =
     val preprocessorBaseUri: Uri = config.preprocessorHttpClientConfig.baseUri
@@ -110,7 +115,7 @@ object Main extends IOApp {
    *
    * This method sets up the application by:
    *   - Initialising implicit dependencies, including the logger, actor system, execution context, distributed data,
-   *     unique address, and cache expiration timeout (TTL).
+   *     unique address, and cache expiration time-to-live (TTL) settings for local and distributed caches.
    *   - Loading configuration using the `DefaultConfigLoader`.
    *   - Running the application using `runApp` and ensuring all resources are cleaned up on exit.
    *
@@ -124,12 +129,13 @@ object Main extends IOApp {
   ): IO[ExitCode] = {
     val config = DefaultConfigLoader
 
-    implicit val logger: Logger[IO]                   = Slf4jLogger.getLogger[IO]
-    implicit val system: ActorSystem                  = ActorSystem("ChemistFlowActorSystem", config.pureConfig)
-    implicit val ec: ExecutionContext                 = system.dispatcher
-    implicit val distributedData                      = DistributedData(system)
-    implicit val selfUniqueAddress: SelfUniqueAddress = distributedData.selfUniqueAddress
-    implicit val ttl: Timeout                         = Timeout(5.minutes)
+    implicit val logger: Logger[IO]                      = Slf4jLogger.getLogger[IO]
+    implicit val system: ActorSystem                     = ActorSystem("ChemistFlowActorSystem", config.pureConfig)
+    implicit val ec: ExecutionContext                    = system.dispatcher
+    implicit val distributedData                         = DistributedData(system)
+    implicit val selfUniqueAddress: SelfUniqueAddress    = distributedData.selfUniqueAddress
+    implicit val distributedTtl: Timeout                 = Timeout(5.minutes)
+    implicit val localTtlWithUnit: Tuple2[Int, TimeUnit] = (5, TimeUnit.MINUTES)
 
     runApp(config)
       .use(_ => IO.unit)
