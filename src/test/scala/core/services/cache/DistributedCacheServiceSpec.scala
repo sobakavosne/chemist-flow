@@ -4,6 +4,7 @@ import akka.actor.ActorSystem
 import akka.cluster.{Cluster, MemberStatus}
 import akka.cluster.ddata.{DistributedData, SelfUniqueAddress}
 import akka.testkit.TestKit
+import akka.util.Timeout
 
 import cats.effect.IO
 import cats.effect.unsafe.implicits.global
@@ -29,7 +30,8 @@ import org.scalatest.matchers.should.Matchers
 
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext
-import akka.util.Timeout
+
+import java.util.concurrent.TimeUnit
 
 class DistributedCacheServiceSpec extends AnyWordSpec with Matchers with BeforeAndAfterAll {
 
@@ -38,8 +40,9 @@ class DistributedCacheServiceSpec extends AnyWordSpec with Matchers with BeforeA
   val selfUniqueAddress: SelfUniqueAddress = DistributedData(system).selfUniqueAddress
   val cluster: Cluster                     = Cluster(system)
 
-  implicit val ec: ExecutionContext    = system.dispatcher
-  implicit val ttlDistributed: Timeout = Timeout(1.seconds)
+  implicit val ec: ExecutionContext                    = system.dispatcher
+  implicit val ttlDistributed: Timeout                 = Timeout(1.seconds)
+  implicit val localTtlWithUnit: Tuple2[Int, TimeUnit] = (5, TimeUnit.MINUTES)
 
   cluster.registerOnMemberUp {
     println("Cluster is fully operational")
@@ -81,6 +84,7 @@ class DistributedCacheServiceSpec extends AnyWordSpec with Matchers with BeforeA
       } yield retrieved
 
       val retrievedMechanism = result.unsafeRunSync()
+
       retrievedMechanism shouldEqual mechanism
     }
 
@@ -104,6 +108,7 @@ class DistributedCacheServiceSpec extends AnyWordSpec with Matchers with BeforeA
       } yield retrieved
 
       val retrievedMechanismDetails = result.unsafeRunSync()
+
       retrievedMechanismDetails shouldEqual mechanismDetails
     }
 
@@ -123,6 +128,7 @@ class DistributedCacheServiceSpec extends AnyWordSpec with Matchers with BeforeA
       } yield retrieved
 
       val retrievedReaction = result.unsafeRunSync()
+
       retrievedReaction shouldEqual reaction
     }
 
@@ -143,6 +149,7 @@ class DistributedCacheServiceSpec extends AnyWordSpec with Matchers with BeforeA
       } yield retrieved
 
       val retrievedReactionDetails = result.unsafeRunSync()
+
       retrievedReactionDetails shouldEqual reactionDetails
     }
 
@@ -157,8 +164,9 @@ class DistributedCacheServiceSpec extends AnyWordSpec with Matchers with BeforeA
       } yield (created, attempt)
 
       val (created, attempt) = result.unsafeRunSync()
+
       created shouldEqual Right(mechanism)
-      attempt shouldEqual Left(s"Mechanism with ID $mechanismId already exists in cache.")
+      attempt shouldEqual Left(s"Mechanism with ID $mechanismId already exists in the cache.")
     }
 
     "create a reaction only if it doesn't exist using createReaction" in {
@@ -172,8 +180,9 @@ class DistributedCacheServiceSpec extends AnyWordSpec with Matchers with BeforeA
       } yield (created, attempt)
 
       val (created, attempt) = result.unsafeRunSync()
+
       created shouldEqual Right(reaction)
-      attempt shouldEqual Left(s"Reaction with ID $reactionId already exists in cache.")
+      attempt shouldEqual Left(s"Reaction with ID $reactionId already exists in the cache.")
     }
 
     "return None for non-existent mechanism IDs" in {
@@ -185,6 +194,7 @@ class DistributedCacheServiceSpec extends AnyWordSpec with Matchers with BeforeA
     "return None for non-existent reaction IDs" in {
       val cacheService             = new DistributedCacheService[IO](system, selfUniqueAddress)
       val result: Option[Reaction] = cacheService.getReaction(999).unsafeRunSync()
+
       result shouldBe None
     }
   }

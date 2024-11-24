@@ -17,6 +17,8 @@ import org.typelevel.log4cats.Logger
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration.FiniteDuration
 
+import java.util.concurrent.TimeUnit
+
 /**
  * Provides managed resources for initialising and managing services in the application.
  *
@@ -177,7 +179,8 @@ object ServiceResources {
   )(
     implicit
     ex: ExecutionContext,
-    ttl: Timeout,
+    distributedTtl: Timeout,
+    localTtlWithUnit: (Int, TimeUnit),
     logger: Logger[IO]
   ): Resource[IO, DistributedCacheService[IO]] =
     Resource.make(

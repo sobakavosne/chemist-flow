@@ -30,6 +30,8 @@ import org.typelevel.log4cats.Logger
 import scala.concurrent.{Await, Future}
 import scala.concurrent.duration.DurationInt
 
+import java.util.concurrent.TimeUnit
+
 class MainSpec extends AsyncWordSpec with Matchers with BeforeAndAfterAll {
 
   implicit val logger: Logger[IO] = Slf4jLogger.getLogger[IO]
@@ -39,8 +41,9 @@ class MainSpec extends AsyncWordSpec with Matchers with BeforeAndAfterAll {
     DefaultConfigLoader.pureConfig
   )
 
-  implicit val selfUniqueAddress: SelfUniqueAddress = DistributedData(system).selfUniqueAddress
-  implicit val ttlDistributed: Timeout              = Timeout(1.seconds)
+  implicit val selfUniqueAddress: SelfUniqueAddress    = DistributedData(system).selfUniqueAddress
+  implicit val ttlDistributed: Timeout                 = Timeout(1.seconds)
+  implicit val localTtlWithUnit: Tuple2[Int, TimeUnit] = (5, TimeUnit.MINUTES)
 
   override def afterAll(): Unit = {
     system.terminate()

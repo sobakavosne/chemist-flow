@@ -31,6 +31,7 @@ lazy val root = (project in file("."))
       http4sEmberServer,
       http4sCirce,
       http4sDSL,
+      caffeine,
       pureconfig.cross(CrossVersion.for3Use2_13),
       akkaStream.cross(CrossVersion.for3Use2_13),
       akkaCluster.cross(CrossVersion.for3Use2_13),
