@@ -1,5 +1,6 @@
 #!/bin/sh
 
+echo ""
 echo "Checking for unstaged changes..."
 git diff --exit-code
 EXIT_CODE=$?
